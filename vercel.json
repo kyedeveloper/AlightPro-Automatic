@@ -1,15 +1,6 @@
 {
-  "version": 2,
-  "builds": [
-    {
-      "src": "prem.js",
-      "use": "@vercel/node"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "prem.js"
-    }
-  ]
+  "private": true,
+  "dependencies": {
+    "@vercel/edge": "^0.1.2"
+  }
 }
