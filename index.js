@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Alight Pro Juiko | Dashboard</title>
+  <style>
+    :root {
+      --bg-color: #0f172a;
+      --card-bg: #1e293b;
+      --primary: #10b981;
+      --primary-hover: #059669;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: #334155;
+      --term-bg: #000000;
+      --term-text: #22c55e;
+    }
+    * { 
+      box-sizing: border-box; 
+      margin: 0; 
+      padding: 0; 
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+    }
+    body { 
+      background-color: var(--bg-color); 
+      color: var(--text-main); 
+      display: flex; 
+      justify-content: center; 
+      align-items: center; 
+      min-height: 100vh; 
+      padding: 20px; 
+    }
+    .container { 
+      max-width: 480px; 
+      width: 100%; 
+    }
+    .header { 
+      text-align: center; 
+      margin-bottom: 30px; 
+    }
+    .header h1 { 
+      color: var(--primary); 
+      font-size: 28px; 
+      text-transform: uppercase; 
+      letter-spacing: 2px; 
+      text-shadow: 0 0 10px rgba(16, 185, 129, 0.3); 
+    }
+    .header p { 
+      color: var(--text-muted); 
+      font-size: 14px; 
+      margin-top: 5px; 
+    }
+    .card { 
+      background-color: var(--card-bg); 
+      border: 1px solid var(--border); 
+      border-radius: 12px; 
+      padding: 24px; 
+      margin-bottom: 20px; 
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); 
+    }
+    .card h3 { 
+      font-size: 16px; 
+      margin-bottom: 12px; 
+      display: flex; 
+      align-items: center; 
+      gap: 8px; 
+    }
+    .step-badge { 
+      background-color: var(--primary); 
+      color: #000; 
+      width: 24px; 
+      height: 24px; 
+      border-radius: 50%; 
+      display: flex; 
+      justify-content: center; 
+      align-items: center; 
+      font-size: 12px; 
+      font-weight: bold; 
+    }
+    .input-group { 
+      margin-bottom: 15px; 
+    }
+    input { 
+      width: 100%; 
+      padding: 14px; 
+      border-radius: 8px; 
+      border: 1px solid var(--border); 
+      background-color: var(--bg-color); 
+      color: var(--text-main); 
+      font-size: 14px; 
+      outline: none; 
+      transition: border 0.3s; 
+    }
+    input:focus { 
+      border-color: var(--primary); 
+    }
+    button { 
+      width: 100%; 
+      padding: 14px; 
+      border-radius: 8px; 
+      border: none; 
+      background-color: var(--primary); 
+      color: #000; 
+      font-size: 15px; 
+      font-weight: bold; 
+      cursor: pointer; 
+      transition: background 0.3s, transform 0.1s; 
+    }
+    button:hover { 
+      background-color: var(--primary-hover); 
+    }
+    button:active { 
+      transform: scale(0.98); 
+    }
+    .terminal { 
+      background-color: var(--term-bg); 
+      border-radius: 8px; 
+      padding: 16px; 
+      font-family: 'Courier New', Courier, monospace; 
+      font-size: 13px; 
+      color: var(--term-text); 
+      min-height: 120px; 
+      max-height: 200px; 
+      overflow-y: auto; 
+      border: 1px solid #111; 
+      box-shadow: inset 0 0 10px rgba(0,0,0,0.5); 
+      white-space: pre-wrap; 
+      word-break: break-all; 
+    }
+    .terminal-header { 
+      font-family: sans-serif; 
+      font-size: 12px; 
+      color: #666; 
+      margin-bottom: 8px; 
+      border-bottom: 1px solid #333; 
+      padding-bottom: 4px; 
+    }
+    .loader { 
+      display: none; 
+      margin-left: 8px; 
+      font-size: 12px; 
+    }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--term-bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="header">
+      <h1>Alight Pro Juiko</h1>
+      <p>Sistem Pembuatan Akun Premium Otomatis</p>
+    </div>
+
+    <div class="card">
+      <h3><span class="step-badge">1</span> Kirim Email Link</h3>
+      <div class="input-group">
+        <input type="email" id="email" placeholder="Masukkan alamat email kamu..." autocomplete="off">
+      </div>
+      <button onclick="sendEmail()" id="btnSend">Kirim Email <span id="loadSend" class="loader">⏳</span></button>
+    </div>
+
+    <div class="card">
+      <h3><span class="step-badge">2</span> Verifikasi Magic Link</h3>
+      <div class="input-group">
+        <input type="text" id="magicLink" placeholder="Paste Magic Link dari email di sini..." autocomplete="off">
+      </div>
+      <button onclick="verifyAcc()" id="btnVerify">Verifikasi Akun <span id="loadVerify" class="loader">⏳</span></button>
+    </div>
+
+    <div class="card" style="padding: 16px;">
+      <div class="terminal">
+        <div class="terminal-header">System Log - Ready</div>
+        <div id="logOutput">> Menunggu instruksi...</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const logOutput = document.getElementById('logOutput');
+
+    function addLog(msg) {
+      const time = new Date().toLocaleTimeString('id-ID', { hour12: false });
+      logOutput.innerText += '\n[' + time + '] ' + msg;
+      logOutput.scrollTop = logOutput.scrollHeight;
+    }
+
+    function setLoading(btnId, loadId, isLoading) {
+      const btn = document.getElementById(btnId);
+      const load = document.getElementById(loadId);
+      if (isLoading) {
+        btn.disabled = true;
+        btn.style.opacity = '0.7';
+        load.style.display = 'inline';
+      } else {
+        btn.disabled = false;
+        btn.style.opacity = '1';
+        load.style.display = 'none';
+      }
+    }
+
+    async function sendEmail() {
+      const email = document.getElementById('email').value.trim();
+      if (!email) return alert('Bro, isi emailnya dulu ya!');
+      
+      addLog('> Memproses pengiriman email ke: ' + email + '...');
+      setLoading('btnSend', 'loadSend', true);
+      
+      try {
+        const res = await fetch('/api/send', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email })
+        });
+        const data = await res.json();
+        addLog('> Sukses! Response API:\n' + JSON.stringify(data, null, 2));
+        addLog('> Silakan cek kotak masuk atau spam email lu.');
+      } catch (err) {
+        addLog('! ERROR: ' + err.message);
+      } finally {
+        setLoading('btnSend', 'loadSend', false);
+      }
+    }
+
+    async function verifyAcc() {
+      const email = document.getElementById('email').value.trim();
+      const magicLink = document.getElementById('magicLink').value.trim();
+      
+      if (!email || !magicLink) return alert('Email dan Magic Link wajib diisi bro!');
+      
+      addLog('> Memulai verifikasi akun...');
+      setLoading('btnVerify', 'loadVerify', true);
+      
+      try {
+        const res = await fetch('/api/verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, magicLink })
+        });
+        const data = await res.json();
+        addLog('> Verifikasi selesai! Response API:\n' + JSON.stringify(data, null, 2));
+      } catch (err) {
+        addLog('! ERROR: ' + err.message);
+      } finally {
+        setLoading('btnVerify', 'loadVerify', false);
+      }
+    }
+  </script>
+</body>
+</html>
