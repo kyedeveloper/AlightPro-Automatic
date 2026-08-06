@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Premium Hub | Dashboard</title>
+  <title>Alight Pro Hub | Dashboard</title>
   
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -138,8 +138,8 @@
     <div class="login-box">
       <h2><i class="fa-solid fa-shield-halved"></i> PREMIUM HUB</h2>
       <div class="role-info">
-        <span>Admin: 1234</span>
-        <span>Member: 0000</span>
+        <span>Admin: rahasia</span>
+        <span>Member: ytta</span>
       </div>
       <input type="password" id="pinInput" placeholder="Masukkan PIN akses..." autocomplete="off">
       <button onclick="checkLogin()"><i class="fa-solid fa-right-to-bracket"></i> MASUK SISTEM</button>
@@ -256,7 +256,7 @@
         </div>
       </div>
 
-      <div class="footer-credit">© juiko coders</div>
+      <div class="footer-credit">© Juiko Community</div>
 
     </div>
   </div>
@@ -268,8 +268,8 @@
       const pin = pinInput.value.trim();
       const bgMusic = document.getElementById('bgMusic');
       
-      if (pin === "1234" || pin === "0000") {
-        if (pin === "0000") {
+      if (pin === "990055" || pin === "0000") {
+        if (pin === "1517") {
           const accNav = document.getElementById('nav-account');
           if (accNav) accNav.style.display = 'none';
         }
@@ -284,7 +284,7 @@
         switchTab('tab-home');
 
       } else {
-        alert("PIN Salah! Gunakan 1234 (Admin) atau 0000 (Member)");
+        alert("PIN Salah! Gunakan kode (Admin) atau kode (Member)");
       }
     }
 
