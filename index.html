@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Premium Hub | Dashboard</title>
+  
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <!-- Icon dari FontAwesome (Termasuk TikTok & WA) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    :root {
+      --bg-color: #050a15; --card-bg: rgba(30, 41, 59, 0.85);
+      --primary: #00ff88; --primary-hover: #00cc6a;
+      --text-main: #f8fafc; --border: #1e3a2a;
+      --term-bg: #000; --term-text: #00ff88;
+      --sidebar-width: 250px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, sans-serif; }
+    body { background-color: var(--bg-color); color: var(--text-main); overflow-x: hidden; }
+
+    #matrixCanvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; opacity: 0.3; }
+
+    #loginScreen {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: var(--bg-color); display: flex; flex-direction: column; justify-content: center; align-items: center;
+      z-index: 1000; transition: opacity 0.5s;
+    }
+    .login-box {
+      background: var(--card-bg); padding: 30px; border-radius: 12px;
+      border: 1px solid var(--primary); text-align: center; width: 90%; max-width: 350px;
+      box-shadow: 0 0 20px rgba(0, 255, 136, 0.2);
+    }
+    .login-box h2 { color: var(--primary); margin-bottom: 20px; }
+    .role-info { font-size: 12px; color: #888; margin-bottom: 15px; display: flex; justify-content: space-between; }
+
+    #mainApp { display: none; }
+    
+    .sidebar {
+      position: fixed; top: 0; left: -250px; width: var(--sidebar-width); height: 100vh;
+      background: var(--card-bg); border-right: 1px solid var(--border);
+      transition: 0.3s; z-index: 99; padding-top: 70px; backdrop-filter: blur(10px);
+    }
+    .sidebar.active { left: 0; }
+    .nav-item {
+      padding: 15px 20px; display: flex; align-items: center; gap: 10px;
+      cursor: pointer; transition: 0.2s; border-left: 4px solid transparent;
+    }
+    .nav-item:hover, .nav-item.active { background: rgba(0, 255, 136, 0.1); border-left-color: var(--primary); color: var(--primary); }
+
+    .topbar {
+      position: fixed; top: 0; left: 0; width: 100%; padding: 15px 20px;
+      background: rgba(5, 10, 21, 0.9); z-index: 100; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center; backdrop-filter: blur(5px);
+    }
+    .menu-btn { position: absolute; left: 20px; background: none; border: none; color: var(--primary); font-size: 24px; cursor: pointer; }
+    
+    .content-area { padding: 80px 20px 20px; transition: 0.3s; max-width: 600px; margin: 0 auto; }
+    
+    .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 20px; backdrop-filter: blur(10px); }
+    .card h3 { font-size: 16px; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; color: var(--primary); }
+    input, select { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 8px; border: 1px solid var(--border); background: rgba(0,0,0,0.5); color: #fff; outline: none; }
+    input:focus { border-color: var(--primary); }
+    button { width: 100%; padding: 12px; border-radius: 8px; border: none; background: var(--primary); color: #000; font-weight: bold; cursor: pointer; transition: 0.2s; display: flex; justify-content: center; align-items: center; gap: 10px; }
+    button:hover { background: var(--primary-hover); transform: scale(0.98); }
+    
+    .terminal-container { position: relative; }
+    .terminal { background: var(--term-bg); border-radius: 8px; padding: 15px; font-family: monospace; font-size: 13px; color: var(--term-text); min-height: 120px; max-height: 200px; overflow-y: auto; border: 1px solid #111; white-space: pre-wrap; }
+    .copy-btn { position: absolute; top: 10px; right: 10px; background: #333; color: #fff; padding: 5px 10px; font-size: 12px; width: auto; }
+    
+    .tab-content { display: none; animation: fadeIn 0.3s; }
+    .tab-content.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Custom Button untuk Sosmed */
+    .btn-sosmed { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 12px; text-decoration: none; border-radius: 8px; font-weight: bold; margin-bottom: 15px; transition: 0.2s; }
+    .btn-tiktok { background: #000; color: #fff; border: 1px solid #333; }
+    .btn-tiktok:hover { background: #111; transform: scale(0.98); }
+    .btn-whatsapp { background: #25D366; color: #fff; }
+    .btn-whatsapp:hover { background: #1ebe5d; transform: scale(0.98); }
+
+  </style>
+</head>
+<body>
+
+  <audio id="bgMusic" loop>
+    <source src="lagu.mp3" type="audio/mpeg">
+  </audio>
+
+  <canvas id="matrixCanvas"></canvas>
+
+  <div id="loginScreen">
+    <div class="login-box">
+      <h2><i class="fa-solid fa-user-secret"></i> SYSTEM LOGIN</h2>
+      <div class="role-info">
+        <span>Admin: 1234</span>
+        <span>Member: 0000</span>
+      </div>
+      <input type="password" id="pinInput" placeholder="Masukkan PIN..." autocomplete="off">
+      <button onclick="checkLogin()"><i class="fa-solid fa-right-to-bracket"></i> MASUK</button>
+    </div>
+  </div>
+
+  <div id="mainApp">
+    <div class="topbar">
+      <button class="menu-btn" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
+      <h2 style="font-size: 18px; color: var(--primary); text-transform: uppercase;">Premium Hub</h2>
+    </div>
+
+    <div class="sidebar" id="sidebar">
+      <div class="nav-item active" id="nav-alight" onclick="switchTab('tab-alight')">
+        <i class="fa-solid fa-crown"></i> Generate Premium
+      </div>
+      <div class="nav-item" id="nav-tools" onclick="switchTab('tab-tools')">
+        <i class="fa-solid fa-screwdriver-wrench"></i> All Tools
+      </div>
+      <div class="nav-item" id="nav-account" onclick="switchTab('tab-account')">
+        <i class="fa-solid fa-user"></i> Account Info
+      </div>
+      
+      <!-- MENU BARU: INFO PENGEMBANG -->
+      <div class="nav-item" id="nav-developer" onclick="switchTab('tab-developer')">
+        <i class="fa-solid fa-laptop-code"></i> Info Pengembang
+      </div>
+
+      <div class="nav-item" onclick="logout()" style="margin-top: 50px; color: #ff4757;">
+        <i class="fa-solid fa-power-off"></i> Logout
+      </div>
+    </div>
+
+    <div class="content-area">
+      
+      <!-- TAB 1: ALIGHT PREM -->
+      <div id="tab-alight" class="tab-content active">
+        <div class="card">
+          <h3><i class="fa-solid fa-envelope"></i> 1. Kirim Email Link</h3>
+          <input type="email" id="email" placeholder="Masukkan email target...">
+          <button onclick="sendEmail()"><i class="fa-solid fa-paper-plane"></i> Kirim Email</button>
+        </div>
+        <div class="card">
+          <h3><i class="fa-solid fa-link"></i> 2. Verifikasi Magic Link</h3>
+          <input type="text" id="magicLink" placeholder="Paste Magic Link di sini...">
+          <button onclick="verifyAcc()"><i class="fa-solid fa-check-double"></i> Verifikasi Akun</button>
+        </div>
+        <div class="card terminal-container">
+          <button class="copy-btn" onclick="copyTerminalLog()"><i class="fa-regular fa-copy"></i> Copy</button>
+          <div class="terminal" id="logOutput">> System ready...</div>
+        </div>
+      </div>
+
+      <!-- TAB 2: TOOLS -->
+      <div id="tab-tools" class="tab-content">
+        <div class="card">
+          <h3><i class="fa-solid fa-download"></i> Universal Downloader</h3>
+          <select id="dlPlatform">
+            <option value="tiktok_video">TikTok Video (MP4)</option>
+            <option value="tiktok_audio">TikTok Audio (MP3)</option>
+            <option value="youtube_video">YouTube Video (MP4)</option>
+            <option value="youtube_audio">YouTube Audio (MP3)</option>
+          </select>
+          <input type="text" id="dlUrl" placeholder="Paste Link URL di sini...">
+          <button onclick="processDownload()"><i class="fa-solid fa-cloud-arrow-down"></i> Eksekusi Target</button>
+        </div>
+      </div>
+
+      <!-- TAB 3: ACCOUNT INFO (CUMA ADMIN) -->
+      <div id="tab-account" class="tab-content">
+        <div class="card" style="text-align: center;">
+          <img src="https://ui-avatars.com/api/?name=Admin+Juiko&background=00ff88&color=000" style="border-radius:50%; margin-bottom:15px;" alt="Avatar">
+          <h3 style="justify-content:center;">Status: <span style="color:var(--primary)" id="userStatusText">ADMINISTRATOR</span></h3>
+          <p style="font-size:14px; margin-bottom:15px;">Akses Penuh ke Sistem.</p>
+          
+          <h4 style="margin-top:20px; font-size:12px;">Server Ping</h4>
+          <div style="height: 100px; width: 100%; margin-bottom:15px;">
+            <canvas id="activityChart"></canvas>
+          </div>
+          <img src="https://api.visitorbadge.io/api/visitors?path=alight-pro-by-juiko.vercel.app&countColor=%2310b981&labelColor=%231e293b" />
+        </div>
+      </div>
+
+      <!-- TAB 4: INFO PENGEMBANG (BARU) -->
+      <div id="tab-developer" class="tab-content">
+        <div class="card" style="text-align: center;">
+          <h3 style="justify-content: center; margin-bottom: 20px;"><i class="fa-solid fa-address-card"></i> Informasi Pengembang</h3>
+          <p style="font-size: 14px; color: #94a3b8; margin-bottom: 25px;">Terima kasih sudah menggunakan Premium Hub. Ikuti terus update web dan tools terbaru dari gw di bawah ini:</p>
+          
+          <!-- Ganti LINK_TIKTOK_LU_DI_SINI dengan link asli lu -->
+          <a href="https://tiktok.com/@feyzzie1" target="_blank" class="btn-sosmed btn-tiktok">
+            <i class="fa-brands fa-tiktok" style="font-size: 18px; color: #00f2fe;"></i> Follow TikTok Gw
+          </a>
+
+          <!-- Ganti LINK_SALURAN_WA_LU_DI_SINI dengan link asli lu -->
+          <a href="https://whatsapp.com/channel/0029VbC0z6jJpe8kuk5eEb2d" target="_blank" class="btn-sosmed btn-whatsapp">
+            <i class="fa-brands fa-whatsapp" style="font-size: 20px;"></i> Gabung Saluran WhatsApp
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    let audioCtx;
+    function playBeep(type = 'normal') {
+      if (!audioCtx) audioCtx = new AudioContext();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain); gain.connect(audioCtx.destination);
+      osc.type = (type === 'error') ? 'sawtooth' : 'sine';
+      osc.frequency.value = (type === 'error') ? 300 : (type === 'success' ? 1200 : 800);
+      gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+      osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+    }
+    document.addEventListener('input', () => playBeep('normal'));
+
+    const PIN_ADMIN = "9900221188";
+    const PIN_MEMBER = "0000";
+
+    function checkLogin() {
+      playBeep();
+      const pin = document.getElementById('pinInput').value;
+      const bgMusic = document.getElementById('bgMusic');
+      
+      let role = "";
+      if (pin === PIN_ADMIN) role = "ADMIN";
+      else if (pin === PIN_MEMBER) role = "MEMBER";
+
+      if (role !== "") {
+        playBeep('success');
+        
+        if (role === "MEMBER") {
+          document.getElementById('nav-account').style.display = 'none';
+        } else {
+          document.getElementById('nav-account').style.display = 'flex';
+        }
+
+        bgMusic.play().catch(e => console.log("Gagal putar lagu otomatis", e));
+
+        document.getElementById('loginScreen').style.opacity = '0';
+        setTimeout(() => {
+          document.getElementById('loginScreen').style.display = 'none';
+          document.getElementById('mainApp').style.display = 'block';
+          switchTab('tab-alight'); 
+        }, 500);
+
+        Swal.fire({ title: 'Akses Diberikan', text: `Login sebagai ${role}`, icon: 'success', background: '#1e293b', color: '#00ff88', confirmButtonColor: '#00ff88' });
+      } else {
+        playBeep('error');
+        Swal.fire({ title: 'Akses Ditolak!', text: 'PIN Salah!', icon: 'error', background: '#1e293b', color: '#ff4757', confirmButtonColor: '#ff4757' });
+      }
+    }
+
+    function logout() {
+      playBeep();
+      const bgMusic = document.getElementById('bgMusic');
+      bgMusic.pause(); 
+      bgMusic.currentTime = 0; 
+
+      document.getElementById('loginScreen').style.display = 'flex';
+      setTimeout(() => document.getElementById('loginScreen').style.opacity = '1', 50);
+      document.getElementById('mainApp').style.display = 'none';
+      document.getElementById('pinInput').value = '';
+    }
+
+    function toggleSidebar() {
+      playBeep();
+      document.getElementById('sidebar').classList.toggle('active');
+    }
+
+    function switchTab(tabId) {
+      playBeep();
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      
+      document.getElementById(tabId).classList.add('active');
+      event.currentTarget.classList.add('active');
+      document.getElementById('sidebar').classList.remove('active'); 
+    }
+
+    const logOutput = document.getElementById('logOutput');
+    function addLog(msg) {
+      const time = new Date().toLocaleTimeString('id-ID', { hour12: false });
+      logOutput.innerText += `\n[${time}] ${msg}`;
+      logOutput.scrollTop = logOutput.scrollHeight;
+    }
+    function copyTerminalLog() {
+      playBeep();
+      navigator.clipboard.writeText(logOutput.innerText);
+      Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Log disalin!', showConfirmButton: false, timer: 1500, background: '#1e293b', color: '#fff' });
+    }
+
+    async function sendEmail() {
+      playBeep();
+      const email = document.getElementById('email').value.trim();
+      if (!email) return Swal.fire('Error', 'Isi email dulu!', 'warning');
+      addLog('> Mengirim eksekusi ke ' + email);
+      try {
+        const res = await fetch('/api/send', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email }) });
+        addLog('> Sukses kirim email.');
+        Swal.fire('Terkirim!', 'Cek email buat ngambil Magic Link.', 'success');
+      } catch (err) { addLog('! Error: ' + err.message); }
+    }
+
+    async function verifyAcc() {
+      playBeep();
+      const email = document.getElementById('email').value.trim();
+      const link = document.getElementById('magicLink').value.trim();
+      if (!email || !link) return Swal.fire('Error', 'Email & Link wajib isi!', 'warning');
+      addLog('> Verifikasi akun berjalan...');
+      try {
+        const res = await fetch('/api/verify', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, magicLink: link }) });
+        addLog('> Verifikasi SELESAI! Akun Premium Aktif.');
+        playBeep('success');
+        Swal.fire('BERHASIL!', 'Akun Premium sudah jadi.', 'success');
+      } catch (err) { addLog('! Error: ' + err.message); }
+    }
+
+    async function processDownload() {
+      playBeep();
+      const platform = document.getElementById('dlPlatform').value;
+      const url = document.getElementById('dlUrl').value.trim();
+      if (!url) return Swal.fire('Error', 'Masukin link videonya dulu bro!', 'warning');
+      addLog(`> Memproses link ${platform}...`);
+      Swal.fire({ title: 'Mengekstrak Video...', text: 'Tunggu bentar ya bro.', allowOutsideClick: false, background: '#1e293b', color: '#00ff88', didOpen: () => { Swal.showLoading(); } });
+      try {
+        const res = await fetch('/api/download', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ platform, url }) });
+        const data = await res.json();
+        if (!res.ok || !data.status) throw new Error(data.error || 'Server gagal ngambil video.');
+        addLog('> Sukses! Link download berhasil digenerate.');
+        playBeep('success');
+        Swal.fire({ title: 'File Ketemu! 🎉', html: `<a href="${data.downloadUrl}" target="_blank" style="display:inline-block; padding:12px 20px; background:#00ff88; color:#000; text-decoration:none; border-radius:8px; font-weight:bold; width:100%;"><i class="fa-solid fa-download"></i> DOWNLOAD SEKARANG</a>`, icon: 'success', showConfirmButton: false, background: '#1e293b', color: '#fff' });
+      } catch (err) {
+        playBeep('error'); addLog('! Error: ' + err.message);
+        Swal.fire({ title: 'Waduh Gagal!', text: err.message, icon: 'error', background: '#1e293b', color: '#ff4757', confirmButtonColor: '#ff4757' });
+      }
+    }
+
+    const ctx = document.getElementById('activityChart').getContext('2d');
+    const activityChart = new Chart(ctx, {
+      type: 'line', data: { labels: ['','','','','',''], datasets: [{ data: [15,22,18,30,25,20], borderColor: '#00ff88', borderWidth: 2, pointRadius: 0, tension: 0.4 }] },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { display: false }, x: { display: false } }, animation: { duration: 400 } }
+    });
+    setInterval(() => { activityChart.data.datasets[0].data.shift(); activityChart.data.datasets[0].data.push(Math.floor(Math.random() * 30) + 10); activityChart.update(); }, 1500);
+
+    const canvas = document.getElementById('matrixCanvas'); const c = canvas.getContext('2d');
+    canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+    const chars = '01ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split(''); const font_size = 14; const columns = canvas.width / font_size;
+    const drops = []; for(let x=0; x<columns; x++) drops[x] = 1;
+    function drawMatrix() {
+      c.fillStyle = 'rgba(5, 10, 21, 0.05)'; c.fillRect(0, 0, canvas.width, canvas.height);
+      c.fillStyle = '#0f0'; c.font = font_size + 'px monospace';
+      for(let i=0; i<drops.length; i++) {
+        const text = chars[Math.floor(Math.random() * chars.length)];
+        c.fillText(text, i * font_size, drops[i] * font_size);
+        if(drops[i] * font_size > canvas.height && Math.random() > 0.975) drops[i] = 0; drops[i]++;
+      }
+    }
+    setInterval(drawMatrix, 50);
+  </script>
+</body>
+  </html>
+  
