@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Alight Pro Hub | Enterprise Core v4.0</title>
+  
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-base: #020617; --card-bg: rgba(15, 23, 42, 0.85);
+      --primary: #00ff88; --primary-glow: rgba(0, 255, 136, 0.4);
+      --primary-hover: #10b981; --text-main: #f8fafc; --text-muted: #94a3b8;
+      --border: rgba(255, 255, 255, 0.08); --border-focus: rgba(0, 255, 136, 0.5);
+      --term-bg: #000000; --term-text: #00ff88;
+      --sidebar-width: 270px;
+      --bezier-snappy: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      --bezier-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+    
+    body { 
+      background-color: var(--bg-base); color: var(--text-main); 
+      overflow-x: hidden; min-height: 100dvh;
+      background-image: 
+        radial-gradient(circle at 0% 0%, rgba(0, 255, 136, 0.05) 0%, transparent 50%),
+        radial-gradient(circle at 100% 100%, rgba(99, 102, 241, 0.05) 0%, transparent 50%);
+      background-attachment: fixed;
+    }
+
+    /* GRID ANIMATION BACKGROUND */
+    .cyber-grid {
+      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1;
+      background-image: linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+      background-size: 40px 40px; pointer-events: none;
+    }
+
+    /* STATE MANAGEMENT CSS */
+    .view-layer {
+      position: fixed; inset: 0; width: 100%; height: 100dvh;
+      transition: opacity 0.5s var(--bezier-smooth), transform 0.5s var(--bezier-smooth), visibility 0.5s;
+    }
+    .view-hidden { opacity: 0; visibility: hidden; transform: scale(1.05); pointer-events: none; }
+    .view-active { opacity: 1; visibility: visible; transform: scale(1); pointer-events: all; z-index: 10; }
+
+    /* AUTHENTICATION MODULE */
+    #authLayer { background: rgba(2, 6, 23, 0.95); backdrop-filter: blur(20px); display: flex; justify-content: center; align-items: center; z-index: 99999; }
+    
+    .auth-box {
+      background: var(--card-bg); padding: 40px 30px; border-radius: 24px;
+      border: 1px solid rgba(0, 255, 136, 0.2); width: 90%; max-width: 380px;
+      box-shadow: 0 25px 50px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.1);
+      text-align: center; position: relative;
+    }
+    
+    .auth-icon { width: 70px; height: 70px; margin: 0 auto 20px; background: rgba(0, 255, 136, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border-focus); box-shadow: 0 0 25px var(--primary-glow); }
+    .auth-icon i { font-size: 32px; color: var(--primary); }
+    
+    .auth-title { color: var(--text-main); font-size: 24px; font-weight: 800; letter-spacing: 1px; margin-bottom: 5px; }
+    .auth-subtitle { color: var(--primary); font-size: 13px; font-weight: 600; margin-bottom: 25px; letter-spacing: 2px; text-transform: uppercase; }
+
+    .input-core { width: 100%; padding: 16px 20px; background: rgba(0,0,0,0.5); border: 1px solid var(--border); border-radius: 14px; color: #fff; font-size: 15px; outline: none; transition: var(--bezier-smooth); text-align: center; letter-spacing: 2px; margin-bottom: 20px; }
+    .input-core:focus { border-color: var(--primary); box-shadow: 0 0 15px var(--primary-glow); background: rgba(0,0,0,0.8); }
+    
+    .btn-core { width: 100%; padding: 16px; background: var(--primary); color: #000; font-weight: 800; font-size: 15px; border: none; border-radius: 14px; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; transition: 0.2s; box-shadow: 0 5px 20px rgba(0, 255, 136, 0.2); }
+    .btn-core:active { transform: scale(0.96); }
+
+    /* CORE DASHBOARD SYSTEM */
+    #dashboardLayer { overflow-y: auto; background: transparent; }
+    
+    .sys-topbar { position: fixed; top: 0; width: 100%; height: 70px; background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(15px); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; z-index: 1000; }
+    .sys-brand { font-size: 18px; font-weight: 800; color: var(--primary); letter-spacing: 1.5px; }
+    
+    .sys-sidebar { position: fixed; top: 0; left: -100%; width: var(--sidebar-width); height: 100dvh; background: rgba(15, 23, 42, 0.98); backdrop-filter: blur(25px); border-right: 1px solid var(--border); z-index: 9999; padding-top: 80px; transition: left 0.4s var(--bezier-snappy); box-shadow: 20px 0 50px rgba(0,0,0,0.8); }
+    .sys-sidebar.active { left: 0; }
+    
+    .nav-node { padding: 16px 24px; display: flex; align-items: center; gap: 15px; color: var(--text-muted); font-size: 14px; font-weight: 600; cursor: pointer; transition: 0.3s; border-left: 4px solid transparent; }
+    .nav-node:hover, .nav-node.active { background: rgba(0, 255, 136, 0.08); border-left-color: var(--primary); color: var(--primary); padding-left: 30px; }
+    
+    .sys-content { padding: 95px 20px 100px; max-width: 700px; margin: 0 auto; }
+    
+    .module-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 20px; padding: 25px; margin-bottom: 25px; backdrop-filter: blur(10px); box-shadow: 0 10px 30px rgba(0,0,0,0.4); animation: slideUp 0.5s var(--bezier-snappy) backwards; }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+    .module-card h3 { font-size: 16px; color: var(--text-main); margin-bottom: 20px; display: flex; align-items: center; gap: 10px; font-weight: 700; }
+    .module-card h3 i { color: var(--primary); }
+    
+    .terminal-ui { background: var(--term-bg); border: 1px solid var(--border); border-radius: 12px; padding: 15px; font-family: 'Fira Code', monospace; font-size: 12px; color: var(--term-text); height: 160px; overflow-y: auto; line-height: 1.6; box-shadow: inset 0 0 15px rgba(0,255,136,0.05); }
+    
+    .floating-fab { position: fixed; bottom: 25px; left: 20px; width: 55px; height: 55px; background: var(--primary); color: #000; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; box-shadow: 0 8px 25px rgba(0,255,136,0.4); z-index: 9998; border: none; transition: 0.3s; }
+    .floating-fab:active { transform: scale(0.9); }
+    
+    .pane-section { display: none; }
+    .pane-section.active { display: block; animation: fadeIn 0.4s ease forwards; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    select.input-core { appearance: none; background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2300ff88%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E"); background-repeat: no-repeat; background-position: right 15px top 50%; background-size: 12px auto; }
+  </style>
+</head>
+<body>
+
+  <div class="cyber-grid"></div>
+  <audio id="sysAudioNode" loop><source src="lagu.mp3" type="audio/mpeg"></audio>
+
+  <!-- LAYER 1: SECURE AUTHENTICATION (PURE JS DOM, NO FORM TAGS) -->
+  <main id="authLayer" class="view-layer view-active">
+    <div class="auth-box">
+      <div class="auth-icon"><i class="fa-solid fa-fingerprint"></i></div>
+      <h1 class="auth-title">PREMIUM HUB</h1>
+      <div class="auth-subtitle">Encrypted Access Portal</div>
+      
+      <!-- Input murni tanpa form pembungkus -->
+      <div style="position: relative;">
+        <input type="password" id="corePinInput" class="input-core" placeholder="Enter Security PIN" autocomplete="off" inputmode="numeric">
+        <button id="btnCoreLogin" class="btn-core">
+          <i class="fa-solid fa-unlock-keyhole"></i> INITIALIZE SYSTEM
+        </button>
+      </div>
+    </div>
+  </main>
+
+  <!-- LAYER 2: ENTERPRISE DASHBOARD -->
+  <main id="dashboardLayer" class="view-layer view-hidden">
+    <header class="sys-topbar">
+      <div class="sys-brand">HUB // OS v4.0</div>
+      <div style="display:flex; gap: 15px;">
+        <button id="btnToggleAudio" style="background:none; border:none; color:var(--primary); font-size:18px; cursor:pointer;"><i class="fa-solid fa-volume-xmark"></i></button>
+      </div>
+    </header>
+
+    <button id="btnTriggerSidebar" class="floating-fab"><i class="fa-solid fa-bars-staggered"></i></button>
+
+    <nav id="coreSidebar" class="sys-sidebar">
+      <div class="nav-node active" data-bind="view-home"><i class="fa-solid fa-house-chimney"></i> Main Interface</div>
+      <div class="nav-node" data-bind="view-generator"><i class="fa-solid fa-wand-magic-sparkles"></i> Premium Engine</div>
+      <div class="nav-node" data-bind="view-tools"><i class="fa-solid fa-toolbox"></i> Universal Tools</div>
+      <div class="nav-node" data-bind="view-network"><i class="fa-solid fa-satellite-dish"></i> Network & Status</div>
+      <div class="nav-node" data-bind="view-dev"><i class="fa-solid fa-code"></i> Developer Matrix</div>
+      <div class="nav-node" id="btnCoreLogout" style="margin-top: 50px; color: #ff3366; border-left-color: transparent;"><i class="fa-solid fa-power-off"></i> Terminate Session</div>
+    </nav>
+
+    <section class="sys-content">
+      
+      <!-- VIEW: HOME -->
+      <div id="view-home" class="pane-section active">
+        <div class="module-card" style="text-align: center;">
+          <img src="https://ui-avatars.com/api/?name=Juiko+Coders&background=00ff88&color=000&size=120" style="border-radius:50%; margin: 0 auto 20px; border: 3px solid var(--primary); display: block; box-shadow: 0 0 30px rgba(0,255,136,0.2);">
+          <h2 style="font-size: 24px; font-weight: 800; margin-bottom: 10px;">JUIKO CODERS</h2>
+          <div style="background: rgba(0,0,0,0.4); padding: 20px; border-radius: 14px; border: 1px solid var(--border); margin-bottom: 20px; text-align: left;">
+            <p style="color: var(--text-muted); font-size: 13px; line-height: 1.8; font-style: italic;">
+              "Hai aku Juiko, ini adalah web yg gw deploy dri Vercel nah gw mau mempermudah orang agar mengepremkan akun am nya secara mudah dan tools yg lain mau gua tambah stabilkan. Untuk informasi selanjutnya ada di saluran ya."
+            </p>
+          </div>
+          <button id="btnCheckRoles" class="btn-core" style="background: rgba(0,255,136,0.1); border: 1px dashed var(--primary); color: var(--primary); box-shadow: none;">
+            <i class="fa-solid fa-shield-cat"></i> Cek Info Roles & Akses
+          </button>
+        </div>
+      </div>
+
+      <!-- VIEW: GENERATOR -->
+      <div id="view-generator" class="pane-section">
+        <div class="module-card">
+          <h3><i class="fa-solid fa-envelope-circle-check"></i> Modul Eksekusi Email</h3>
+          <input type="email" id="inputTargetEmail" class="input-core" style="text-align: left;" placeholder="Target Email Address...">
+          <button id="btnInjectEmail" class="btn-core"><i class="fa-solid fa-paper-plane"></i> Deploy Payload Email</button>
+        </div>
+        <div class="module-card">
+          <h3><i class="fa-solid fa-link"></i> Modul Verifikasi Token</h3>
+          <input type="text" id="inputMagicLink" class="input-core" style="text-align: left;" placeholder="Paste Magic Link String...">
+          <button id="btnVerifyToken" class="btn-core"><i class="fa-solid fa-bolt"></i> Eksekusi Bypass Premium</button>
+        </div>
+        <div class="module-card">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;">
+            <h3 style="margin:0;"><i class="fa-solid fa-terminal"></i> System Terminal</h3>
+            <button id="btnCopyTerm" style="background:var(--primary); border:none; padding:5px 10px; border-radius:6px; font-weight:bold; cursor:pointer; font-size:11px;">COPY</button>
+          </div>
+          <div class="terminal-ui" id="sysTerminalNode">> System core initialized...<br>> Waiting for commands...</div>
+        </div>
+      </div>
+
+      <!-- VIEW: TOOLS -->
+      <div id="view-tools" class="pane-section">
+        <div class="module-card">
+          <h3><i class="fa-solid fa-cloud-arrow-down"></i> Universal Media Extractor</h3>
+          <select id="selectPlatform" class="input-core" style="text-align: left; appearance: none;">
+            <option value="tiktok_video">TikTok Engine (MP4 High)</option>
+            <option value="tiktok_audio">TikTok Engine (MP3 Audio)</option>
+            <option value="youtube_video">YouTube Engine (MP4 Video)</option>
+            <option value="youtube_audio">YouTube Engine (MP3 Audio)</option>
+          </select>
+          <input type="text" id="inputMediaUrl" class="input-core" style="text-align: left;" placeholder="Paste URL Media Source...">
+          <button id="btnExtractMedia" class="btn-core"><i class="fa-solid fa-download"></i> Extract Media Berkas</button>
+        </div>
+      </div>
+
+      <!-- VIEW: NETWORK/ACCOUNT -->
+      <div id="view-network" class="pane-section">
+        <div class="module-card" style="text-align: center;">
+          <h2 style="font-size: 16px; color: var(--text-muted); margin-bottom: 5px;">ACTIVE CLEARANCE LEVEL</h2>
+          <h1 id="nodeDisplayRole" style="color: var(--primary); font-size: 28px; font-weight: 800; letter-spacing: 2px; margin-bottom: 25px;">UNKNOWN</h1>
+          
+          <h3 style="justify-content: center;"><i class="fa-solid fa-chart-line"></i> Live Network Telemetry</h3>
+          <div style="height: 120px; width: 100%; margin: 15px 0;">
+            <canvas id="canvasPingStream"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- VIEW: DEVELOPER -->
+      <div id="view-dev" class="pane-section">
+        <div class="module-card" style="text-align: center;">
+          <img src="https://ui-avatars.com/api/?name=Developer+Core&background=10b981&color=000" style="border-radius:20px; margin-bottom:20px; width:80px;">
+          <h3><i class="fa-solid fa-code-branch"></i> Developer Matrix Hub</h3>
+          <p style="font-size:13px; color:var(--text-muted); margin-bottom:25px; line-height:1.6;">Akses saluran pengembang resmi untuk update infrastruktur tools terbaru.</p>
+          
+          <a href="https://tiktok.com/@feyzzie1" target="_blank" class="btn-core" style="background:#0f172a; color:#fff; border:1px solid var(--border); margin-bottom:12px;">
+            <i class="fa-brands fa-tiktok" style="color:#00f2fe;"></i> Akses TikTok Dev
+          </a>
+          <a href="https://whatsapp.com/channel/0029VbC0z6jJpe8kuk5eEb2d" target="_blank" class="btn-core" style="background:#25D366; color:#fff;">
+            <i class="fa-brands fa-whatsapp"></i> Join Server WhatsApp
+          </a>
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+  <!-- JAVASCRIPT: ENTERPRISE SPA ARCHITECTURE -->
+  <script>
+    /**
+     * CORE SYSTEM ARCHITECTURE v4.0
+     * Arsitektur mutakhir berbasis class, menjamin anti-macet di semua device.
+     */
+    class SystemCoreOS {
+      constructor() {
+        this.sessionData = {
+          activeRole: null,
+          isAuthenticated: false,
+          audioEnabled: false
+        };
+        
+        // Konfigurasi Database Lokal (Dual-Layer Bypass)
+        this.LOCAL_BYPASS_MATRIX = {
+          "990055": "ADMINISTRATOR",
+          "0000": "MEMBER",
+          "visitor": "VISITOR"
+        };
+
+        this.DOM = {
+          layerAuth: document.getElementById('authLayer'),
+          layerApp: document.getElementById('dashboardLayer'),
+          sidebar: document.getElementById('coreSidebar'),
+          pinInput: document.getElementById('corePinInput'),
+          terminal: document.getElementById('sysTerminalNode'),
+          audioNode: document.getElementById('sysAudioNode'),
+          roleDisplay: document.getElementById('nodeDisplayRole'),
+          audioBtnIcon: document.querySelector('#btnToggleAudio i')
+        };
+
+        this.bindEvents();
+        this.initializeTelemetry();
+        console.log("[SYSTEM] Core Modules Loaded Successfully.");
+      }
+
+      bindEvents() {
+        // [1] AUTHENTICATION EVENTS (Klik dan Enter ditangani murni via JS)
+        document.getElementById('btnCoreLogin').addEventListener('click', (e) => {
+          e.preventDefault();
+          this.executeAuthSequence();
+        });
+
+        this.DOM.pinInput.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault(); // Blokir sifat form bawaan browser
+            this.executeAuthSequence();
+          }
+        });
+
+        // [2] SYSTEM UI ROUTING
+        document.getElementById('btnTriggerSidebar').addEventListener('click', () => {
+          this.DOM.sidebar.classList.toggle('active');
+        });
+
+        document.querySelectorAll('.nav-node[data-bind]').forEach(node => {
+          node.addEventListener('click', () => this.routeToView(node.getAttribute('data-bind')));
+        });
+
+        // [3] UTILITY MODULES
+        document.getElementById('btnCoreLogout').addEventListener('click', () => this.terminateSession());
+        document.getElementById('btnToggleAudio').addEventListener('click', () => this.toggleAudioStream());
+        
+        const btnRoles = document.getElementById('btnCheckRoles');
+        if(btnRoles) btnRoles.addEventListener('click', () => alert("mau role lain? sabar belum jadi ini web"));
+
+        document.getElementById('btnCopyTerm').addEventListener('click', () => {
+          navigator.clipboard.writeText(this.DOM.terminal.innerText);
+          alert('System Log disalin ke memori perangkat.');
+        });
+
+        // [4] API EXECUTORS
+        document.getElementById('btnInjectEmail').addEventListener('click', () => this.apiEmailInject());
+        document.getElementById('btnVerifyToken').addEventListener('click', () => this.apiVerifyToken());
+        document.getElementById('btnExtractMedia').addEventListener('click', () => this.apiExtractMedia());
+      }
+
+      /* =========================================
+         DUAL-LAYER AUTHENTICATION ENGINE
+         Mengamankan login dari kegagalan backend.
+      ========================================== */
+      async executeAuthSequence() {
+        const pinCode = this.DOM.pinInput.value.trim();
+        if (!pinCode) {
+          alert("[SYS_ERR] Modul PIN kosong. Harap isi.");
+          return;
+        }
+
+        let assignedRole = null;
+
+        // LAYER 1: Coba tembak API Backend (Vercel)
+        try {
+          const apiResponse = await fetch('/api/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ pin: pinCode })
+          });
+          
+          if(apiResponse.ok) {
+            const data = await apiResponse.json();
+            if(data.success) assignedRole = data.role;
+          }
+        } catch (apiError) {
+          console.warn("[SYS_WARN] API Backend Timeout/Error. Beralih ke Local Bypass Matrix...");
+        }
+
+        // LAYER 2: Jika API Gagal (Atau 404), Gunakan Bypass Lokal
+        if (!assignedRole) {
+          if (this.LOCAL_BYPASS_MATRIX[pinCode]) {
+            assignedRole = this.LOCAL_BYPASS_MATRIX[pinCode];
+            console.log("[SYS_OK] Auth dikonfirmasi via Local Bypass.");
+          
