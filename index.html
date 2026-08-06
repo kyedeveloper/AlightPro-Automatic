@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Premium Hub | Dashboard</title>
+  
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    :root {
+      --card-bg: rgba(13, 20, 35, 0.75);
+      --primary: #00ff88; --primary-hover: #00cc6a;
+      --text-main: #f8fafc; --border: rgba(255, 255, 255, 0.08);
+      --term-bg: #030712; --term-text: #00ff88;
+      --sidebar-width: 250px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, sans-serif; }
+    
+    /* BACKGROUND PREMIUM LUXURY MESH + FUTURISTIC GRID */
+    body { 
+      background-color: #030712;
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(0, 255, 136, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(99, 102, 241, 0.12) 0%, transparent 40%),
+        radial-gradient(circle at 50% 50%, rgba(49, 16, 63, 0.15) 0%, transparent 60%),
+        linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 100% 100%, 30px 30px, 30px 30px;
+      background-attachment: fixed;
+      color: var(--text-main); 
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+
+    #loginScreen {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(3, 7, 18, 0.85); backdrop-filter: blur(15px);
+      display: flex; flex-direction: column; justify-content: center; align-items: center;
+      z-index: 9999;
+    }
+    .login-box {
+      background: var(--card-bg); padding: 35px 30px; border-radius: 20px;
+      border: 1px solid var(--border); text-align: center; width: 90%; max-width: 360px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(20px);
+    }
+    .login-box h2 { color: var(--primary); margin-bottom: 20px; letter-spacing: 1.5px; font-size: 22px; text-shadow: 0 0 15px rgba(0,255,136,0.3); }
+    .role-info { font-size: 12px; color: #94a3b8; margin-bottom: 20px; display: flex; justify-content: space-between; background: rgba(0,0,0,0.3); padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border); }
+
+    #mainApp { display: none; }
+    
+    .sidebar {
+      position: fixed; top: 0; left: -250px; width: var(--sidebar-width); height: 100vh;
+      background: rgba(13, 20, 35, 0.95); border-right: 1px solid var(--border);
+      transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 99; padding-top: 75px; backdrop-filter: blur(20px);
+      box-shadow: 10px 0 30px rgba(0,0,0,0.5);
+    }
+    .sidebar.active { left: 0; }
+    .nav-item {
+      padding: 16px 20px; display: flex; align-items: center; gap: 12px;
+      cursor: pointer; transition: 0.2s; border-left: 4px solid transparent;
+      color: #94a3b8; font-size: 14px; font-weight: 500;
+    }
+    .nav-item:hover, .nav-item.active { background: rgba(0, 255, 136, 0.08); border-left-color: var(--primary); color: var(--primary); }
+
+    .topbar {
+      position: fixed; top: 0; left: 0; width: 100%; height: 65px;
+      background: rgba(13, 20, 35, 0.8); z-index: 100; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center; backdrop-filter: blur(15px);
+    }
+    
+    .music-btn {
+      position: absolute; right: 20px;
+      background: rgba(0,0,0,0.3); border: 1px solid var(--border); color: var(--primary);
+      width: 38px; height: 38px; border-radius: 50%; font-size: 16px; cursor: pointer; 
+      display: flex; align-items: center; justify-content: center; transition: 0.2s;
+    }
+    .music-btn:hover { background: rgba(0,255,136,0.15); transform: scale(1.05); }
+
+    .floating-menu-btn {
+      position: fixed; bottom: 25px; left: 20px;
+      background: var(--primary); color: #000; width: 52px; height: 52px;
+      border-radius: 50%; border: none; font-size: 20px; cursor: pointer;
+      box-shadow: 0 6px 25px rgba(0, 255, 136, 0.4);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 98; transition: 0.2s;
+    }
+    .floating-menu-btn:hover { transform: scale(1.08); background: var(--primary-hover); }
+
+    .content-area { padding: 90px 20px 30px; max-width: 600px; margin: 0 auto; }
+    
+    .card { 
+      background: var(--card-bg); border: 1px solid var(--border); border-radius: 20px; 
+      padding: 24px; margin-bottom: 20px; backdrop-filter: blur(15px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+    .card h3 { font-size: 16px; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; color: var(--primary); }
+    input, select { width: 100%; padding: 14px; margin-bottom: 16px; border-radius: 12px; border: 1px solid var(--border); background: rgba(0,0,0,0.4); color: #fff; outline: none; font-size: 14px; transition: 0.2s; }
+    input:focus { border-color: var(--primary); box-shadow: 0 0 10px rgba(0,255,136,0.2); }
+    button { width: 100%; padding: 14px; border-radius: 12px; border: none; background: var(--primary); color: #000; font-weight: bold; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; font-size: 14px; transition: 0.2s; box-shadow: 0 4px 15px rgba(0,255,136,0.3); }
+    button:hover { background: var(--primary-hover); transform: translateY(-1px); }
+    
+    .terminal-container { position: relative; }
+    .terminal { background: var(--term-bg); border-radius: 12px; padding: 16px; font-family: monospace; font-size: 13px; color: var(--term-text); min-height: 130px; max-height: 220px; overflow-y: auto; border: 1px solid var(--border); white-space: pre-wrap; line-height: 1.5; }
+    .copy-btn { position: absolute; top: 12px; right: 12px; background: rgba(255,255,255,0.08); color: #fff; padding: 6px 12px; font-size: 11px; width: auto; border-radius: 8px; border: 1px solid var(--border); box-shadow: none; }
+    .copy-btn:hover { background: rgba(255,255,255,0.15); transform: none; }
+    
+    .tab-content { display: none; animation: fadeIn 0.3s ease; }
+    .tab-content.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+    .btn-sosmed { display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; padding: 14px; text-decoration: none; border-radius: 12px; font-weight: bold; margin-bottom: 14px; font-size: 14px; transition: 0.2s; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+    .btn-tiktok { background: #0f172a; color: #fff; border: 1px solid var(--border); }
+    .btn-tiktok:hover { background: #1e293b; transform: translateY(-1px); }
+    .btn-whatsapp { background: #25D366; color: #fff; }
+    .btn-whatsapp:hover { background: #1eb95a; transform: translateY(-1px); }
+
+    .footer-credit { text-align: center; padding: 20px 0; color: #64748b; font-size: 12px; letter-spacing: 1px; font-weight: 500; }
+  </style>
+</head>
+<body>
+
+  <audio id="bgMusic" loop>
+    <source src="lagu.mp3" type="audio/mpeg">
+  </audio>
+
+  <div id="loginScreen">
+    <div class="login-box">
+      <h2><i class="fa-solid fa-shield-halved"></i> PREMIUM HUB</h2>
+      <div class="role-info">
+        <span>Admin: kepo</span>
+        <span>Member: 0000</span>
+      </div>
+      <input type="password" id="pinInput" placeholder="Masukkan PIN akses..." autocomplete="off">
+      <button onclick="checkLogin()"><i class="fa-solid fa-right-to-bracket"></i> MASUK SISTEM</button>
+    </div>
+  </div>
+
+  <div id="mainApp">
+    <div class="topbar">
+      <h2 style="font-size: 16px; color: var(--primary); text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700;">Premium Hub</h2>
+      <button class="music-btn" onclick="toggleMusic()" id="musicToggleBtn" title="Putar/Matikan Musik">
+        <i class="fa-solid fa-volume-high"></i>
+      </button>
+    </div>
+
+    <button class="floating-menu-btn" onclick="toggleSidebar()">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+
+    <div class="sidebar" id="sidebar">
+      <div class="nav-item active" id="nav-home" onclick="switchTab('tab-home')">
+        <i class="fa-solid fa-house"></i> Home
+      </div>
+      <div class="nav-item" id="nav-alight" onclick="switchTab('tab-alight')">
+        <i class="fa-solid fa-crown"></i> Generate Premium
+      </div>
+      <div class="nav-item" id="nav-tools" onclick="switchTab('tab-tools')">
+        <i class="fa-solid fa-screwdriver-wrench"></i> All Tools
+      </div>
+      <div class="nav-item" id="nav-account" onclick="switchTab('tab-account')">
+        <i class="fa-solid fa-user"></i> Account Info
+      </div>
+      <div class="nav-item" id="nav-developer" onclick="switchTab('tab-developer')">
+        <i class="fa-solid fa-laptop-code"></i> Info Pengembang
+      </div>
+      <div class="nav-item" onclick="logout()" style="margin-top: 40px; color: #ff4757;">
+        <i class="fa-solid fa-power-off"></i> Logout
+      </div>
+    </div>
+
+    <div class="content-area">
+
+      <!-- TAB 0: HOME -->
+      <div id="tab-home" class="tab-content active">
+        <div class="card" style="text-align: center; padding: 35px 20px;">
+          <img src="https://ui-avatars.com/api/?name=Juiko+Coders&background=00ff88&color=000&size=120" style="border-radius:50%; margin-bottom:20px; border: 3px solid var(--primary); box-shadow: 0 0 20px rgba(0,255,136,0.3);" alt="Avatar">
+          <h2 style="color: var(--primary); margin-bottom: 15px; font-size: 22px; letter-spacing: 0.5px;">Juiko Coders</h2>
+          <div style="background: rgba(0,0,0,0.3); padding: 22px; border-radius: 14px; border: 1px solid var(--border);">
+            <h4 style="margin-bottom: 12px; color: #fff; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 8px;"><i class="fa-solid fa-circle-info" style="color:var(--primary);"></i> About Project</h4>
+            <p style="color: #94a3b8; font-size: 13px; line-height: 1.8; font-style: italic;">
+              "Hai aku Juiko, ini adalah web yg gw deploy dri Vercel nah gw mau mempermudah orang agar mengepremkan akun am nya secara mudah dan tools yg lain mau gua tambah stabilkan. Untuk informasi selanjutnya ada di saluran ya."
+            </p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- TAB 1: ALIGHT PREM -->
+      <div id="tab-alight" class="tab-content">
+        <div class="card">
+          <h3><i class="fa-solid fa-envelope"></i> 1. Kirim Email Link</h3>
+          <input type="email" id="email" placeholder="Masukkan email target...">
+          <button onclick="sendEmail()"><i class="fa-solid fa-paper-plane"></i> Kirim Email</button>
+        </div>
+        <div class="card">
+          <h3><i class="fa-solid fa-link"></i> 2. Verifikasi Magic Link</h3>
+          <input type="text" id="magicLink" placeholder="Paste Magic Link di sini...">
+          <button onclick="verifyAcc()"><i class="fa-solid fa-check-double"></i> Verifikasi Akun</button>
+        </div>
+        <div class="card terminal-container">
+          <button class="copy-btn" onclick="copyTerminalLog()"><i class="fa-regular fa-copy"></i> Copy</button>
+          <div class="terminal" id="logOutput">> System ready...</div>
+        </div>
+      </div>
+
+      <!-- TAB 2: TOOLS -->
+      <div id="tab-tools" class="tab-content">
+        <div class="card">
+          <h3><i class="fa-solid fa-download"></i> Universal Downloader</h3>
+          <select id="dlPlatform">
+            <option value="tiktok_video">TikTok Video (MP4)</option>
+            <option value="tiktok_audio">TikTok Audio (MP3)</option>
+            <option value="youtube_video">YouTube Video (MP4)</option>
+            <option value="youtube_audio">YouTube Audio (MP3)</option>
+          </select>
+          <input type="text" id="dlUrl" placeholder="Paste Link URL di sini...">
+          <button onclick="processDownload()"><i class="fa-solid fa-cloud-arrow-down"></i> Eksekusi Target</button>
+        </div>
+      </div>
+
+      <!-- TAB 3: ACCOUNT INFO -->
+      <div id="tab-account" class="tab-content">
+        <div class="card" style="text-align: center;">
+          <img src="https://ui-avatars.com/api/?name=Admin+Juiko&background=00ff88&color=000" style="border-radius:50%; margin-bottom:15px;" alt="Avatar">
+          <h3 style="justify-content:center;">Status: <span style="color:var(--primary)">ADMINISTRATOR</span></h3>
+          <p style="font-size:13px; margin-bottom:15px; color:#94a3b8;">Akses Penuh ke Sistem.</p>
+          <h4 style="margin-top:20px; font-size:12px; color:#94a3b8; margin-bottom:8px;">Server Ping</h4>
+          <div style="height: 100px; width: 100%; margin-bottom:15px;">
+            <canvas id="activityChart"></canvas>
+          </div>
+          <img src="https://api.visitorbadge.io/api/visitors?path=alight-pro-by-juiko.vercel.app&countColor=%2310b981&labelColor=%231e293b" style="border-radius: 6px;" />
+        </div>
+      </div>
+
+      <!-- TAB 4: INFO PENGEMBANG -->
+      <div id="tab-developer" class="tab-content">
+        <div class="card" style="text-align: center;">
+          <h3 style="justify-content: center; margin-bottom: 15px;"><i class="fa-solid fa-address-card"></i> Informasi Pengembang</h3>
+          <p style="font-size: 13px; color: #94a3b8; margin-bottom: 22px; line-height: 1.6;">Terima kasih sudah menggunakan Premium Hub. Ikuti terus update web dan tools terbaru dari gw di bawah ini:</p>
+          <a href="https://tiktok.com/@feyzzie1" target="_blank" class="btn-sosmed btn-tiktok">
+            <i class="fa-brands fa-tiktok" style="font-size: 18px; color: #00f2fe;"></i> Follow TikTok Gw
+          </a>
+          <a href="https://whatsapp.com/channel/0029VbC0z6jJpe8kuk5eEb2d" target="_blank" class="btn-sosmed btn-whatsapp">
+            <i class="fa-brands fa-whatsapp" style="font-size: 20px;"></i> Gabung Saluran WhatsApp
+          </a>
+        </div>
+      </div>
+
+      <div class="footer-credit">© juiko coders</div>
+
+    </div>
+  </div>
+
+  <script>
+    function checkLogin() {
+      const pin = document.getElementById('pinInput').value.trim();
+      const bgMusic = document.getElementById('bgMusic');
+      
+      if (pin === "9900112288" || pin === "0000") {
+        if (pin === "0000") {
+          const accNav = document.getElementById('nav-account');
+          if (accNav) accNav.style.display = 'none';
+        }
+        
+        if (bgMusic) bgMusic.play().catch(e => console.log(e));
+
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('mainApp').style.display = 'block';
+        switchTab('tab-home');
+      } else {
+        alert("PIN Salah! Gunakan kode (Admin) atau 0000 (Member)");
+      }
+    }
+
+    function logout() {
+      const bgMusic = document.getElementById('bgMusic');
+      if (bgMusic) { bgMusic.pause(); bgMusic.currentTime = 0; }
+      document.getElementById('loginScreen').style.display = 'flex';
+      document.getElementById('mainApp').style.display = 'none';
+      document.getElementById('pinInput').value = '';
+    }
+
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('active');
+    }
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      
+      const target = document.getElementById(tabId);
+      if (target) target.classList.add('active');
+
+      const navId = tabId.replace('tab-', 'nav-');
+      const activeNav = document.getElementById(navId);
+      if (activeNav) activeNav.classList.add('active');
+
+      document.getElementById('sidebar').classList.remove('active'); 
+    }
+
+    function toggleMusic() {
+      const bgMusic = document.getElementById('bgMusic');
+      const icon = document.querySelector('#musicToggleBtn i');
+      if (bgMusic.paused) {
+        bgMusic.play().catch(e => console.log(e));
+        if (icon) icon.className = "fa-solid fa-volume-high";
+      } else {
+        bgMusic.pause();
+        if (icon) icon.className = "fa-solid fa-volume-xmark";
+      }
+    }
+
+    const logOutput = document.getElementById('logOutput');
+    function addLog(msg) {
+      const time = new Date().toLocaleTimeString('id-ID', { hour12: false });
+      if (logOutput) {
+        logOutput.innerText += `\n[${time}] ${msg}`;
+        logOutput.scrollTop = logOutput.scrollHeight;
+      }
+    }
+    function copyTerminalLog() {
+      if (logOutput) {
+        navigator.clipboard.writeText(logOutput.innerText);
+        alert('Log disalin!');
+      }
+    }
+
+    async function sendEmail() {
+      const email = document.getElementById('email').value.trim();
+      if (!email) return alert('Isi email dulu!');
+      addLog('> Mengirim eksekusi ke ' + email);
+      try {
+        await fetch('/api/send', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email }) });
+        addLog('> Sukses kirim email.');
+        alert('Terkirim! Cek email buat ngambil Magic Link.');
+      } catch (err) { addLog('! Error: ' + err.message); }
+    }
+
+    async function verifyAcc() {
+      const email = document.getElementById('email').value.trim();
+      const magicLink = document.getElementById('magicLink').value.trim();
+      if (!email || !magicLink) return alert('Email & Link wajib diisi!');
+      addLog('> Verifikasi akun berjalan...');
+      try {
+        await fetch('/api/verify', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, magicLink }) });
+        addLog('> Verifikasi SELESAI! Akun Premium Aktif.');
+        alert('BERHASIL! Akun Premium sudah jadi.');
+      } catch (err) { addLog('! Error: ' + err.message); }
+    }
+
+    async function processDownload() {
+      const platform = document.getElementById('dlPlatform').value;
+      const url = document.getElementById('dlUrl').value.trim();
+      if (!url) return alert('Masukin link videonya dulu bro!');
+      addLog(`> Memproses link ${platform}...`);
+      try {
+        const res = await fetch('/api/downloader', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ platform, url }) });
+        const data = await res.json();
+        if (!res.ok || !data.status) throw new Error(data.error || 'Gagal mengambil file.');
+        addLog('> Sukses! Link download berhasil digenerate.');
+        window.open(data.downloadUrl, '_blank');
+      } catch (err) {
+        addLog('! Error: ' + err.message);
+        alert('Gagal: ' + err.message);
+      }
+    }
+
+    const ctxElem = document.getElementById('activityChart');
+    if (ctxElem && typeof Chart !== 'undefined') {
+      const ctx = ctxElem.getContext('2d');
+      const activityChart = new Chart(ctx, {
+        type: 'line', data: { labels: ['','','','','',''], datasets: [{ data: [15,22,18,30,25,20], borderColor: '#00ff88', borderWidth: 2, pointRadius: 0, tension: 0.4 }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { display: false }, x: { display: false } }, animation: { duration: 400 } }
+      });
+      setInterval(() => { activityChart.data.datasets[0].data.shift(); activityChart.data.datasets[0].data.push(Math.floor(Math.random() * 30) + 10); activityChart.update(); }, 1500);
+    }
+  </script>
+</body>
+        </html>
+  
