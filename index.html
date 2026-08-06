@@ -18,7 +18,6 @@
     }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, sans-serif; }
     
-    /* BACKGROUND PREMIUM LUXURY MESH + FUTURISTIC GRID */
     body { 
       background-color: #030712;
       background-image: 
@@ -34,36 +33,69 @@
       min-height: 100vh;
     }
 
+    /* ANIMASI LOGIN HALUS & FADE OUT */
     #loginScreen {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(3, 7, 18, 0.85); backdrop-filter: blur(15px);
+      background: rgba(3, 7, 18, 0.88); backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
       display: flex; flex-direction: column; justify-content: center; align-items: center;
-      z-index: 9999;
+      z-index: 9999; 
+      opacity: 1;
+      visibility: visible;
+      transition: opacity 0.7s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.7s;
     }
+    #loginScreen.fade-out {
+      opacity: 0;
+      visibility: hidden;
+    }
+
     .login-box {
       background: var(--card-bg); padding: 35px 30px; border-radius: 20px;
       border: 1px solid var(--border); text-align: center; width: 90%; max-width: 360px;
       box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1);
       backdrop-filter: blur(20px);
+      transform: scale(1);
+      transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
     }
+    #loginScreen.fade-out .login-box {
+      transform: scale(0.92);
+    }
+
     .login-box h2 { color: var(--primary); margin-bottom: 20px; letter-spacing: 1.5px; font-size: 22px; text-shadow: 0 0 15px rgba(0,255,136,0.3); }
     .role-info { font-size: 12px; color: #94a3b8; margin-bottom: 20px; display: flex; justify-content: space-between; background: rgba(0,0,0,0.3); padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border); }
 
-    #mainApp { display: none; }
+    #mainApp { 
+      display: none; 
+      opacity: 0;
+      transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    #mainApp.show {
+      display: block;
+      opacity: 1;
+    }
     
+    /* ANIMASI SIDEBAR LEBIH SMOOTH DAN PERLAMBAT */
     .sidebar {
       position: fixed; top: 0; left: -250px; width: var(--sidebar-width); height: 100vh;
-      background: rgba(13, 20, 35, 0.95); border-right: 1px solid var(--border);
-      transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 99; padding-top: 75px; backdrop-filter: blur(20px);
-      box-shadow: 10px 0 30px rgba(0,0,0,0.5);
+      background: rgba(13, 20, 35, 0.96); border-right: 1px solid var(--border);
+      transition: left 0.5s cubic-bezier(0.16, 1, 0.3, 1); 
+      z-index: 99; padding-top: 75px; backdrop-filter: blur(20px);
+      box-shadow: 15px 0 40px rgba(0,0,0,0.6);
     }
     .sidebar.active { left: 0; }
+
     .nav-item {
       padding: 16px 20px; display: flex; align-items: center; gap: 12px;
-      cursor: pointer; transition: 0.2s; border-left: 4px solid transparent;
+      cursor: pointer; transition: background 0.2s, color 0.2s, padding-left 0.3s cubic-bezier(0.16, 1, 0.3, 1); 
+      border-left: 4px solid transparent;
       color: #94a3b8; font-size: 14px; font-weight: 500;
     }
-    .nav-item:hover, .nav-item.active { background: rgba(0, 255, 136, 0.08); border-left-color: var(--primary); color: var(--primary); }
+    .nav-item:hover, .nav-item.active { 
+      background: rgba(0, 255, 136, 0.08); 
+      border-left-color: var(--primary); 
+      color: var(--primary);
+      padding-left: 25px; /* Efek geser halus pas di-hover/aktif */
+    }
 
     .topbar {
       position: fixed; top: 0; left: 0; width: 100%; height: 65px;
@@ -75,9 +107,9 @@
       position: absolute; right: 20px;
       background: rgba(0,0,0,0.3); border: 1px solid var(--border); color: var(--primary);
       width: 38px; height: 38px; border-radius: 50%; font-size: 16px; cursor: pointer; 
-      display: flex; align-items: center; justify-content: center; transition: 0.2s;
+      display: flex; align-items: center; justify-content: center; transition: 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    .music-btn:hover { background: rgba(0,255,136,0.15); transform: scale(1.05); }
+    .music-btn:hover { background: rgba(0,255,136,0.15); transform: scale(1.1); }
 
     .floating-menu-btn {
       position: fixed; bottom: 25px; left: 20px;
@@ -85,9 +117,9 @@
       border-radius: 50%; border: none; font-size: 20px; cursor: pointer;
       box-shadow: 0 6px 25px rgba(0, 255, 136, 0.4);
       display: flex; align-items: center; justify-content: center;
-      z-index: 98; transition: 0.2s;
+      z-index: 98; transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), background 0.2s;
     }
-    .floating-menu-btn:hover { transform: scale(1.08); background: var(--primary-hover); }
+    .floating-menu-btn:hover { transform: scale(1.12) rotate(90deg); background: var(--primary-hover); }
 
     .content-area { padding: 90px 20px 30px; max-width: 600px; margin: 0 auto; }
     
@@ -95,27 +127,45 @@
       background: var(--card-bg); border: 1px solid var(--border); border-radius: 20px; 
       padding: 24px; margin-bottom: 20px; backdrop-filter: blur(15px);
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      transition: transform 0.3s ease, border-color 0.3s ease;
     }
+    .card:hover { border-color: rgba(0, 255, 136, 0.2); }
+
     .card h3 { font-size: 16px; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; color: var(--primary); }
-    input, select { width: 100%; padding: 14px; margin-bottom: 16px; border-radius: 12px; border: 1px solid var(--border); background: rgba(0,0,0,0.4); color: #fff; outline: none; font-size: 14px; transition: 0.2s; }
-    input:focus { border-color: var(--primary); box-shadow: 0 0 10px rgba(0,255,136,0.2); }
-    button { width: 100%; padding: 14px; border-radius: 12px; border: none; background: var(--primary); color: #000; font-weight: bold; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; font-size: 14px; transition: 0.2s; box-shadow: 0 4px 15px rgba(0,255,136,0.3); }
-    button:hover { background: var(--primary-hover); transform: translateY(-1px); }
+    input, select { width: 100%; padding: 14px; margin-bottom: 16px; border-radius: 12px; border: 1px solid var(--border); background: rgba(0,0,0,0.4); color: #fff; outline: none; font-size: 14px; transition: 0.3s; }
+    input:focus { border-color: var(--primary); box-shadow: 0 0 15px rgba(0,255,136,0.2); }
+    
+    button { 
+      width: 100%; padding: 14px; border-radius: 12px; border: none; background: var(--primary); color: #000; font-weight: bold; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; font-size: 14px; 
+      transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background 0.2s, box-shadow 0.2s; 
+      box-shadow: 0 4px 15px rgba(0,255,136,0.3); 
+    }
+    button:hover { background: var(--primary-hover); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,255,136,0.4); }
+    button:active { transform: translateY(1px); }
     
     .terminal-container { position: relative; }
     .terminal { background: var(--term-bg); border-radius: 12px; padding: 16px; font-family: monospace; font-size: 13px; color: var(--term-text); min-height: 130px; max-height: 220px; overflow-y: auto; border: 1px solid var(--border); white-space: pre-wrap; line-height: 1.5; }
     .copy-btn { position: absolute; top: 12px; right: 12px; background: rgba(255,255,255,0.08); color: #fff; padding: 6px 12px; font-size: 11px; width: auto; border-radius: 8px; border: 1px solid var(--border); box-shadow: none; }
     .copy-btn:hover { background: rgba(255,255,255,0.15); transform: none; }
     
-    .tab-content { display: none; animation: fadeIn 0.3s ease; }
-    .tab-content.active { display: block; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    /* ANIMASI GANTI TAB LEBIH SMOOTH (FADE & SLIDE UP) */
+    .tab-content { 
+      display: none; 
+      opacity: 0; 
+      transform: translateY(12px);
+      transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .tab-content.active { 
+      display: block; 
+      opacity: 1; 
+      transform: translateY(0);
+    }
 
-    .btn-sosmed { display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; padding: 14px; text-decoration: none; border-radius: 12px; font-weight: bold; margin-bottom: 14px; font-size: 14px; transition: 0.2s; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+    .btn-sosmed { display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; padding: 14px; text-decoration: none; border-radius: 12px; font-weight: bold; margin-bottom: 14px; font-size: 14px; transition: transform 0.2s, background 0.2s; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
     .btn-tiktok { background: #0f172a; color: #fff; border: 1px solid var(--border); }
-    .btn-tiktok:hover { background: #1e293b; transform: translateY(-1px); }
+    .btn-tiktok:hover { background: #1e293b; transform: translateY(-2px); }
     .btn-whatsapp { background: #25D366; color: #fff; }
-    .btn-whatsapp:hover { background: #1eb95a; transform: translateY(-1px); }
+    .btn-whatsapp:hover { background: #1eb95a; transform: translateY(-2px); }
 
     .footer-credit { text-align: center; padding: 20px 0; color: #64748b; font-size: 12px; letter-spacing: 1px; font-weight: 500; }
   </style>
@@ -258,7 +308,7 @@
       const pin = document.getElementById('pinInput').value.trim();
       const bgMusic = document.getElementById('bgMusic');
       
-      if (pin === "9900112288" || pin === "0000") {
+      if (pin === "9900221188" || pin === "0000") {
         if (pin === "0000") {
           const accNav = document.getElementById('nav-account');
           if (accNav) accNav.style.display = 'none';
@@ -266,19 +316,40 @@
         
         if (bgMusic) bgMusic.play().catch(e => console.log(e));
 
-        document.getElementById('loginScreen').style.display = 'none';
-        document.getElementById('mainApp').style.display = 'block';
-        switchTab('tab-home');
+        // Animasi fade-out login screen yang perlahan & smooth
+        const loginScreen = document.getElementById('loginScreen');
+        const mainApp = document.getElementById('mainApp');
+        
+        loginScreen.classList.add('fade-out');
+        
+        setTimeout(() => {
+          loginScreen.style.display = 'none';
+          mainApp.classList.add('show');
+          switchTab('tab-home');
+        }, 600); // Waktu jeda disesuaikan dengan durasi CSS transisi
+
       } else {
-        alert("PIN Salah! Gunakan kode (Admin) atau 0000 (Member)");
+        alert("PIN Salah! Gunakan  (Admin) atau 0000 (Member)");
       }
     }
 
     function logout() {
       const bgMusic = document.getElementById('bgMusic');
       if (bgMusic) { bgMusic.pause(); bgMusic.currentTime = 0; }
-      document.getElementById('loginScreen').style.display = 'flex';
-      document.getElementById('mainApp').style.display = 'none';
+      
+      const loginScreen = document.getElementById('loginScreen');
+      const mainApp = document.getElementById('mainApp');
+      
+      mainApp.classList.remove('show');
+      setTimeout(() => {
+        mainApp.style.display = 'none';
+        loginScreen.style.display = 'flex';
+        // Sedikit jeda agar transisi fade-in login muncul halus
+        setTimeout(() => {
+          loginScreen.classList.remove('fade-out');
+        }, 50);
+      }, 400);
+
       document.getElementById('pinInput').value = '';
     }
 
@@ -351,32 +422,4 @@
     }
 
     async function processDownload() {
-      const platform = document.getElementById('dlPlatform').value;
-      const url = document.getElementById('dlUrl').value.trim();
-      if (!url) return alert('Masukin link videonya dulu bro!');
-      addLog(`> Memproses link ${platform}...`);
-      try {
-        const res = await fetch('/api/download.js', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ platform, url }) });
-        const data = await res.json();
-        if (!res.ok || !data.status) throw new Error(data.error || 'Gagal mengambil file.');
-        addLog('> Sukses! Link download berhasil digenerate.');
-        window.open(data.downloadUrl, '_blank');
-      } catch (err) {
-        addLog('! Error: ' + err.message);
-        alert('Gagal: ' + err.message);
-      }
-    }
-
-    const ctxElem = document.getElementById('activityChart');
-    if (ctxElem && typeof Chart !== 'undefined') {
-      const ctx = ctxElem.getContext('2d');
-      const activityChart = new Chart(ctx, {
-        type: 'line', data: { labels: ['','','','','',''], datasets: [{ data: [15,22,18,30,25,20], borderColor: '#00ff88', borderWidth: 2, pointRadius: 0, tension: 0.4 }] },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { display: false }, x: { display: false } }, animation: { duration: 400 } }
-      });
-      setInterval(() => { activityChart.data.datasets[0].data.shift(); activityChart.data.datasets[0].data.push(Math.floor(Math.random() * 30) + 10); activityChart.update(); }, 1500);
-    }
-  </script>
-</body>
-        </html>
-  
+      const platform = document.getElementById('dlPlatform').val
