@@ -1,75 +1,89 @@
-export default async function handler(req, res) {
-  // Hanya izinkan method POST
+module.exports = async function (req, res) {
+  // Pastikan cuma nerima metode POST
   if (req.method !== 'POST') {
-    return res.status(405).json({ status: false, error: 'Method not allowed' });
+    return res.status(405).json({ status: false, error: 'Method tidak diizinkan' });
   }
 
   const { platform, url } = req.body;
-
   if (!url) {
-    return res.status(400).json({ status: false, error: 'URL tidak boleh kosong!' });
+    return res.status(400).json({ status: false, error: 'URL wajib diisi bro' });
   }
 
   try {
-    let downloadUrl = '';
+    let downloadUrl = "";
 
-    // Logika untuk TikTok (Video & Audio)
-    if (platform.startsWith('tiktok')) {
-      const apiResponse = await fetch(`https://tikwm.com/api/?url=${encodeURIComponent(url)}`);
-      const json = await apiResponse.json();
+    // ==========================================
+    // 1. TIKTOK (VIDEO / AUDIO) - TIKWM API
+    // ==========================================
+    if (platform === 'tiktok_video' || platform === 'tiktok_audio') {
+      const fetchUrl = `https://www.tikwm.com/api/?url=${encodeURIComponent(url)}`;
+      const response = await fetch(fetchUrl);
+      const data = await response.json();
       
-      if (!json || !json.data) {
-        throw new Error('Gagal mengambil data dari TikTok.');
-      }
-
-      if (platform === 'tiktok_audio') {
-        downloadUrl = json.data.music; // Link MP3 TikTok
+      if (data.code === 0 && data.data) {
+        downloadUrl = platform === 'tiktok_video' ? data.data.play : data.data.music;
       } else {
-        downloadUrl = json.data.play;  // Link MP4 TikTok tanpa watermark
+        throw new Error('Gagal nemuin video TikTok. Pastikan link bener dan akun nggak di-private.');
       }
     } 
-    // Logika untuk YouTube (Video & Audio yang stabil)
-    else if (platform.startsWith('youtube')) {
-      // Menggunakan API downloader YouTube publik yang stabil
-      const ytApiUrl = `https://apis.davidcyriltech.my.id/youtube/dl?url=${encodeURIComponent(url)}`;
-      const apiResponse = await fetch(ytApiUrl);
-      const json = await apiResponse.json();
-
-      if (!json || (!json.download_url && !json.video && !json.audio)) {
-        // Fallback API alternatif jika yang pertama sedang gangguan
-        const altApiUrl = `https://deliriuss-api-oficial.vercel.app/download/ytdl?url=${encodeURIComponent(url)}`;
-        const altResponse = await fetch(altApiUrl);
-        const altJson = await altResponse.json();
+    
+    // ==========================================
+    // 2. YOUTUBE (MP4 / MP3) - MULTI API
+    // ==========================================
+    else if (platform === 'youtube_video' || platform === 'youtube_audio') {
+      const isVideo = platform === 'youtube_video';
+      
+      try {
+        // PERCOBAAN 1: Pakai API Ryzendesu
+        const type1 = isVideo ? 'ytmp4' : 'ytmp3';
+        const res1 = await fetch(`https://api.ryzendesu.vip/api/downloader/${type1}?url=${encodeURIComponent(url)}`);
+        const data1 = await res1.json();
         
-        if (altJson && altJson.downloadUrl) {
-          downloadUrl = altJson.downloadUrl;
+        if (data1 && data1.url) {
+          downloadUrl = data1.url;
+        } else if (data1 && data1.data && data1.data.url) {
+          downloadUrl = data1.data.url;
         } else {
-          throw new Error('Gagal memproses video YouTube. Pastikan link valid.');
+          throw new Error('API 1 Gagal');
         }
-      } else {
-        if (platform === 'youtube_audio') {
-          downloadUrl = json.audio || json.download_url;
-        } else {
-          downloadUrl = json.download_url || json.video;
+      } catch (err1) {
+        
+        try {
+          // PERCOBAAN 2: Pakai API Agatz (Fallback)
+          const type2 = isVideo ? 'ytmp4' : 'ytmp3';
+          const res2 = await fetch(`https://api.agatz.xyz/api/${type2}?url=${encodeURIComponent(url)}`);
+          const data2 = await res2.json();
+          
+          if (data2.status === 200 && data2.data && data2.data.url) {
+            downloadUrl = data2.data.url;
+          } else {
+            throw new Error('API 2 Gagal');
+          }
+        } catch (err2) {
+            // PERCOBAAN 3: Pakai API Vreden (Last Resort)
+            const type3 = isVideo ? 'ytmp4' : 'ytmp3';
+            const res3 = await fetch(`https://api.vreden.my.id/api/${type3}?url=${encodeURIComponent(url)}`);
+            const data3 = await res3.json();
+
+            if (data3.result && data3.result.download) {
+                downloadUrl = data3.result.download;
+            } else {
+                throw new Error('Semua server YouTube lagi down coy, coba lagi 10 menit ke depan.');
+            }
         }
       }
-    } else {
-      return res.status(400).json({ status: false, error: 'Platform tidak dikenal!' });
+    } 
+    
+    else {
+      throw new Error('Platform nggak dikenal.');
     }
 
-    if (!downloadUrl) {
-      throw new Error('Link download tidak dapat ditemukan dari server.');
-    }
-
-    return res.status(200).json({
-      status: true,
-      downloadUrl: downloadUrl
-    });
+    // Kirim balik link downloadnya ke web
+    if (!downloadUrl) throw new Error('Gagal narik link, coba pakai link format standard.');
+    res.status(200).json({ status: true, downloadUrl });
 
   } catch (err) {
-    return res.status(500).json({
-      status: false,
-      error: err.message || 'Terjadi kesalahan pada server downloader.'
-    });
+    res.status(500).json({ status: false, error: err.message });
   }
-}
+};
+                                     
