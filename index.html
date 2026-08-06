@@ -356,7 +356,7 @@
       if (!url) return alert('Masukin link videonya dulu bro!');
       addLog(`> Memproses link ${platform}...`);
       try {
-        const res = await fetch('/api/downloader', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ platform, url }) });
+        const res = await fetch('/api/download.js', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ platform, url }) });
         const data = await res.json();
         if (!res.ok || !data.status) throw new Error(data.error || 'Gagal mengambil file.');
         addLog('> Sukses! Link download berhasil digenerate.');
