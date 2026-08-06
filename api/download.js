@@ -1,5 +1,4 @@
 module.exports = async function (req, res) {
-  // Pastikan cuma nerima metode POST
   if (req.method !== 'POST') {
     return res.status(405).json({ status: false, error: 'Method tidak diizinkan' });
   }
@@ -13,17 +12,27 @@ module.exports = async function (req, res) {
     let downloadUrl = "";
 
     // ==========================================
-    // 1. TIKTOK (VIDEO / AUDIO) - TIKWM API
+    // 1. TIKTOK (VIDEO / AUDIO) - MULTI API
     // ==========================================
     if (platform === 'tiktok_video' || platform === 'tiktok_audio') {
-      const fetchUrl = `https://www.tikwm.com/api/?url=${encodeURIComponent(url)}`;
-      const response = await fetch(fetchUrl);
-      const data = await response.json();
-      
-      if (data.code === 0 && data.data) {
-        downloadUrl = platform === 'tiktok_video' ? data.data.play : data.data.music;
-      } else {
-        throw new Error('Gagal nemuin video TikTok. Pastikan link bener dan akun nggak di-private.');
+      try {
+        // Percobaan 1: Pakai API Ikyyxd milik lu
+        const resIkyy = await fetch(`https://api.ikyyxd.my.id/api/downloader/tiktok?url=${encodeURIComponent(url)}`);
+        const dataIkyy = await resIkyy.json();
+        if (dataIkyy && (dataIkyy.url || dataIkyy.downloadUrl || (dataIkyy.data && dataIkyy.data.play))) {
+          downloadUrl = dataIkyy.url || dataIkyy.downloadUrl || (platform === 'tiktok_video' ? dataIkyy.data.play : dataIkyy.data.music);
+        } else {
+          throw new Error('API TikTok Ikyyxd Gagal');
+        }
+      } catch (e1) {
+        // Percobaan 2: Fallback ke TikWM API
+        const resTik = await fetch(`https://www.tikwm.com/api/?url=${encodeURIComponent(url)}`);
+        const dataTik = await resTik.json();
+        if (dataTik.code === 0 && dataTik.data) {
+          downloadUrl = platform === 'tiktok_video' ? dataTik.data.play : dataTik.data.music;
+        } else {
+          throw new Error('Gagal mengambil video TikTok dari semua server.');
+        }
       }
     } 
     
@@ -32,58 +41,46 @@ module.exports = async function (req, res) {
     // ==========================================
     else if (platform === 'youtube_video' || platform === 'youtube_audio') {
       const isVideo = platform === 'youtube_video';
-      
-      try {
-        // PERCOBAAN 1: Pakai API Ryzendesu
-        const type1 = isVideo ? 'ytmp4' : 'ytmp3';
-        const res1 = await fetch(`https://api.ryzendesu.vip/api/downloader/${type1}?url=${encodeURIComponent(url)}`);
-        const data1 = await res1.json();
-        
-        if (data1 && data1.url) {
-          downloadUrl = data1.url;
-        } else if (data1 && data1.data && data1.data.url) {
-          downloadUrl = data1.data.url;
-        } else {
-          throw new Error('API 1 Gagal');
-        }
-      } catch (err1) {
-        
-        try {
-          // PERCOBAAN 2: Pakai API Agatz (Fallback)
-          const type2 = isVideo ? 'ytmp4' : 'ytmp3';
-          const res2 = await fetch(`https://api.agatz.xyz/api/${type2}?url=${encodeURIComponent(url)}`);
-          const data2 = await res2.json();
-          
-          if (data2.status === 200 && data2.data && data2.data.url) {
-            downloadUrl = data2.data.url;
-          } else {
-            throw new Error('API 2 Gagal');
-          }
-        } catch (err2) {
-            // PERCOBAAN 3: Pakai API Vreden (Last Resort)
-            const type3 = isVideo ? 'ytmp4' : 'ytmp3';
-            const res3 = await fetch(`https://api.vreden.my.id/api/${type3}?url=${encodeURIComponent(url)}`);
-            const data3 = await res3.json();
+      const type = isVideo ? 'ytmp4' : 'ytmp3';
 
-            if (data3.result && data3.result.download) {
-                downloadUrl = data3.result.download;
-            } else {
-                throw new Error('Semua server YouTube lagi down coy, coba lagi 10 menit ke depan.');
-            }
+      try {
+        // Percobaan 1: Pakai API Ikyyxd milik lu
+        const resIkyy = await fetch(`https://api.ikyyxd.my.id/api/downloader/${type}?url=${encodeURIComponent(url)}`);
+        const dataIkyy = await resIkyy.json();
+        if (dataIkyy && (dataIkyy.url || dataIkyy.downloadUrl || dataIkyy.result)) {
+          downloadUrl = dataIkyy.url || dataIkyy.downloadUrl || dataIkyy.result;
+        } else {
+          throw new Error('API YouTube Ikyyxd Gagal');
+        }
+      } catch (e1) {
+        try {
+          // Percobaan 2: Fallback ke Ryzendesu
+          const res2 = await fetch(`https://api.ryzendesu.vip/api/downloader/${type}?url=${encodeURIComponent(url)}`);
+          const data2 = await res2.json();
+          if (data2 && (data2.url || (data2.data && data2.data.url))) {
+            downloadUrl = data2.url || data2.data.url;
+          } else {
+            throw new Error('API Cadangan 1 Gagal');
+          }
+        } catch (e2) {
+          // Percobaan 3: Fallback terakhir ke Vreden
+          const res3 = await fetch(`https://api.vreden.my.id/api/${type}?url=${encodeURIComponent(url)}`);
+          const data3 = await res3.json();
+          if (data3.result && data3.result.download) {
+            downloadUrl = data3.result.download;
+          } else {
+            throw new Error('Semua server YouTube sedang sibuk/down. Coba beberapa saat lagi.');
+          }
         }
       }
-    } 
-    
-    else {
-      throw new Error('Platform nggak dikenal.');
+    } else {
+      throw new Error('Platform tidak dikenal.');
     }
 
-    // Kirim balik link downloadnya ke web
-    if (!downloadUrl) throw new Error('Gagal narik link, coba pakai link format standard.');
+    if (!downloadUrl) throw new Error('Gagal mendapatkan link download.');
     res.status(200).json({ status: true, downloadUrl });
 
   } catch (err) {
     res.status(500).json({ status: false, error: err.message });
   }
 };
-                                     
