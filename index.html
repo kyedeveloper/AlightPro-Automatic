@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Premium Hub | Dashboard</title>
+  
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    :root {
+      --card-bg: rgba(15, 23, 42, 0.75);
+      --primary: #00ff88; --primary-hover: #00cc6a;
+      --text-main: #f8fafc; --border: rgba(255, 255, 255, 0.1);
+      --term-bg: #000; --term-text: #00ff88;
+      --sidebar-width: 250px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, sans-serif; }
+    
+    body { 
+      background: linear-gradient(135deg, #0f172a, #1e1b4b, #31103f, #0f172a);
+      background-size: 400% 400%;
+      animation: gradientBG 15s ease infinite;
+      color: var(--text-main); 
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+
+    @keyframes gradientBG {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    #loginScreen {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(5, 10, 21, 0.85); backdrop-filter: blur(20px);
+      display: flex; flex-direction: column; justify-content: center; align-items: center;
+      z-index: 1000; transition: opacity 0.5s;
+    }
+    .login-box {
+      background: var(--card-bg); padding: 30px; border-radius: 16px;
+      border: 1px solid var(--border); text-align: center; width: 90%; max-width: 350px;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+      backdrop-filter: blur(12px);
+    }
+    .login-box h2 { color: var(--primary); margin-bottom: 20px; letter-spacing: 1px; }
+    .role-info { font-size: 12px; color: #94a3b8; margin-bottom: 15px; display: flex; justify-content: space-between; }
+
+    #mainApp { display: none; }
+    
+    .sidebar {
+      position: fixed; top: 0; left: -250px; width: var(--sidebar-width); height: 100vh;
+      background: rgba(15, 23, 42, 0.95); border-right: 1px solid var(--border);
+      transition: 0.3s; z-index: 99; padding-top: 70px; backdrop-filter: blur(15px);
+    }
+    .sidebar.active { left: 0; }
+    .nav-item {
+      padding: 15px 20px; display: flex; align-items: center; gap: 10px;
+      cursor: pointer; transition: 0.2s; border-left: 4px solid transparent;
+      color: #94a3b8;
+    }
+    .nav-item:hover, .nav-item.active { background: rgba(0, 255, 136, 0.1); border-left-color: var(--primary); color: var(--primary); }
+
+    .topbar {
+      position: fixed; top: 0; left: 0; width: 100%; height: 60px;
+      background: rgba(15, 23, 42, 0.75); z-index: 100; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center; backdrop-filter: blur(10px);
+    }
+    
+    .floating-menu-btn {
+      position: fixed; bottom: 25px; left: 20px;
+      background: var(--primary); color: #000; width: 50px; height: 50px;
+      border-radius: 50%; border: none; font-size: 20px; cursor: pointer;
+      box-shadow: 0 4px 20px rgba(0, 255, 136, 0.4);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 98; transition: 0.2s;
+    }
+    .floating-menu-btn:hover { transform: scale(1.1); background: var(--primary-hover); }
+
+    .content-area { padding: 80px 20px 20px; transition: 0.3s; max-width: 600px; margin: 0 auto; }
+    
+    .card { 
+      background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; 
+      padding: 20px; margin-bottom: 20px; backdrop-filter: blur(12px);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+    }
+    .card h3 { font-size: 16px; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; color: var(--primary); }
+    input, select { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 10px; border: 1px solid var(--border); background: rgba(0,0,0,0.3); color: #fff; outline: none; }
+    input:focus { border-color: var(--primary); }
+    button { width: 100%; padding: 12px; border-radius: 10px; border: none; background: var(--primary); color: #000; font-weight: bold; cursor: pointer; transition: 0.2s; display: flex; justify-content: center; align-items: center; gap: 10px; }
+    button:hover { background: var(--primary-hover); transform: scale(0.98); }
+    
+    .terminal-container { position: relative; }
+    .terminal { background: var(--term-bg); border-radius: 10px; padding: 15px; font-family: monospace; font-size: 13px; color: var(--term-text); min-height: 120px; max-height: 200px; overflow-y: auto; border: 1px solid var(--border); white-space: pre-wrap; }
+    .copy-btn { position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.1); color: #fff; padding: 5px 10px; font-size: 12px; width: auto; border-radius: 6px; }
+    
+    .tab-content { display: none; animation: fadeIn 0.3s; }
+    .tab-content.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    .btn-sosmed { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 12px; text-decoration: none; border-radius: 10px; font-weight: bold; margin-bottom: 15px; transition: 0.2s; }
+    .btn-tiktok { background: #000; color: #fff; border: 1px solid var(--border); }
+    .btn-tiktok:hover { background: #111; transform: scale(0.98); }
+    .btn-whatsapp { background: #25D366; color: #fff; }
+    .btn-whatsapp:hover { background: #1ebe5d; transform: scale(0.98); }
+
+    .footer-credit {
+      text-align: center;
+      padding: 15px 0 25px 0;
+      color: #94a3b8;
+      font-size: 12px;
+      letter-spacing: 1px;
+    }
+
+    .main-menu {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .profile-container {
+      position: relative;
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 4px solid #0f172a;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    }
+
+    .profile-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .gradient-text {
+      font-size: 24px;
+      font-weight: bold;
+      letter-spacing: 1.5px;
+      background: linear-gradient(to right, #00ff88, #00f2fe, #f72c5b, #ffd700);
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: rainbow 3s linear infinite;
+    }
+
+    @keyframes rainbow {
+      0% { background-position: 0% center; }
+      100% { background-position: 200% center; }
+    }
+
+    .about-section {
+      color: #94a3b8;
+      font-size: 14px;
+      line-height: 1.6;
+      padding: 0 20px;
+      background: rgba(0,0,0,0.2);
+      border-radius: 10px;
+      margin-top: 15px;
+    }
+    
+    .new-feature-note {
+      color: #f72c5b; 
+      font-weight: bold;
+      font-size: 13px;
+      display: block;
+      margin-top: 5px;
+    }
+  </style>
+</head>
+<body>
+
+  <audio id="bgMusic" loop>
+    <source src="lagu.mp3" type="audio/mpeg">
+  </audio>
+
+  <div id="loginScreen">
+    <div class="login-box">
+      <h2><i class="fa-solid fa-shield-halved"></i> SYSTEM LOGIN</h2>
+      <div class="role-info">
+        <span>Admin: kepo</span>
+        <span>Member: kepo</span>
+      </div>
+      <!-- Nambahin onkeyup biar kalau dipencet Enter langsung login -->
+      <input type="password" id="pinInput" placeholder="Masukkan PIN..." autocomplete="off" onkeyup="if(event.key === 'Enter') checkLogin()">
+      <button onclick="checkLogin()"><i class="fa-solid fa-right-to-bracket"></i> MASUK</button>
+    </div>
+  </div>
+
+  <div id="mainApp">
+    <div class="topbar">
+      <h2 style="font-size: 18px; color: var(--primary); text-transform: uppercase; letter-spacing: 1px;">Premium Hub</h2>
+    </div>
+
+    <button class="floating-menu-btn" onclick="toggleSidebar()">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+
+    <div class="sidebar" id="sidebar">
+      <div class="nav-item active" id="nav-main-menu" onclick="switchTab('tab-main-menu')">
+        <i class="fa-solid fa-house"></i> Menu Utama
+      </div>
+      <div class="nav-item" id="nav-alight" onclick="switchTab('tab-alight')">
+        <i class="fa-solid fa-crown"></i> Generate Premium
+      </div>
+      <div class="nav-item" id="nav-tools" onclick="switchTab('tab-tools')">
+        <i class="fa-solid fa-screwdriver-wrench"></i> All Tools
+      </div>
+      <div class="nav-item" id="nav-account" onclick="switchTab('tab-account')">
+        <i class="fa-solid fa-user"></i> Account Info
+      </div>
+      <div class="nav-item" id="nav-developer" onclick="switchTab('tab-developer')">
+        <i class="fa-solid fa-laptop-code"></i> Info Pengembang
+      </div>
+      <div class="nav-item" onclick="logout()" style="margin-top: 50px; color: #ff4757;">
+        <i class="fa-solid fa-power-off"></i> Logout
+      </div>
+    </div>
+
+    <div class="content-area">
+      
+      <!-- MENU UTAMA -->
+      <div id="tab-main-menu" class="tab-content main-menu active">
+        <div class="profile-container">
+          <!-- Pakai nama file yang persis diminta: 1000197027.jpg -->
+          <img src="1000197027.jpg" alt="Profile Juiko Coders">
+        </div>
+        <h1 class="gradient-text">Juiko Coders</h1>
+        <div class="about-section card">
+          <p>project ini untuk memudahkan orang untuk mengenerate am premium dan menggunakan tools yang ada disini,</p>
+          <span class="new-feature-note">dan nanti juga ada fitur fitur terbaru nantikan saja</span>
+        </div>
+      </div>
+
+      <!-- TAB 1: ALIGHT PREM -->
+      <div id="tab-alight" class="tab-content">
+        <div class="card">
+          <h3><i class="fa-solid fa-envelope"></i> 1. Kirim Email Link</h3>
+          <input type="email" id="email" placeholder="Masukkan email target...">
+          <button onclick="sendEmail()"><i class="fa-solid fa-paper-plane"></i> Kirim Email</button>
+        </div>
+        <div class="card">
+          <h3><i class="fa-solid fa-link"></i> 2. Verifikasi Magic Link</h3>
+          <input type="text" id="magicLink" placeholder="Paste Magic Link di sini...">
+          <button onclick="verifyAcc()"><i class="fa-solid fa-check-double"></i> Verifikasi Akun</button>
+        </div>
+        <div class="card terminal-container">
+          <button class="copy-btn" onclick="copyTerminalLog()"><i class="fa-regular fa-copy"></i> Copy</button>
+          <div class="terminal" id="logOutput">> System ready...</div>
+        </div>
+      </div>
+
+      <!-- TAB 2: TOOLS -->
+      <div id="tab-tools" class="tab-content">
+        <div class="card">
+          <h3><i class="fa-solid fa-download"></i> Universal Downloader</h3>
+          <select id="dlPlatform">
+            <option value="tiktok_video">TikTok Video (MP4)</option>
+            <option value="tiktok_audio">TikTok Audio (MP3)</option>
+            <option value="youtube_video">YouTube Video (MP4)</option>
+            <option value="youtube_audio">YouTube Audio (MP3)</option>
+          </select>
+          <input type="text" id="dlUrl" placeholder="Paste Link URL di sini...">
+          <button onclick="processDownload()"><i class="fa-solid fa-cloud-arrow-down"></i> Eksekusi Target</button>
+        </div>
+      </div>
+
+      <!-- TAB 3: ACCOUNT INFO -->
+      <div id="tab-account" class="tab-content">
+        <div class="card" style="text-align: center;">
+          <img src="https://ui-avatars.com/api/?name=Admin+Juiko&background=00ff88&color=000" style="border-radius:50%; margin-bottom:15px;" alt="Avatar">
+          <h3 style="justify-content:center;">Status: <span style="color:var(--primary)" id="userStatusText">ADMINISTRATOR</span></h3>
+          <p style="font-size:14px; margin-bottom:15px; color:#94a3b8;">Akses Penuh ke Sistem.</p>
+          
+          <h4 style="margin-top:20px; font-size:12px; color:#94a3b8;">Server Ping</h4>
+          <div style="height: 100px; width: 100%; margin-bottom:15px;">
+            <canvas id="activityChart"></canvas>
+          </div>
+          <img src="https://api.visitorbadge.io/api/visitors?path=alight-pro-by-juiko.vercel.app&countColor=%2310b981&labelColor=%231e293b" />
+        </div>
+      </div>
+
+      <!-- TAB 4: INFO PENGEMBANG -->
+      <div id="tab-developer" class="tab-content">
+        <div class="card" style="text-align: center;">
+          <h3 style="justify-content: center; margin-bottom: 20px;"><i class="fa-solid fa-address-card"></i> Informasi Pengembang</h3>
+          <p style="font-size: 14px; color: #94a3b8; margin-bottom: 25px;">Terima kasih sudah menggunakan Premium Hub. Ikuti terus update web dan tools terbaru dari gw di bawah ini:</p>
+          
+          <a href="https://tiktok.com/@feyzzie1" target="_blank" class="btn-sosmed btn-tiktok">
+            <i class="fa-brands fa-tiktok" style="font-size: 18px; color: #00f2fe;"></i> Follow TikTok Gw
+          </a>
+
+          <a href="https://whatsapp.com/channel/0029VbC0z6jJpe8kuk5eEb2d" target="_blank" class="btn-sosmed btn-whatsapp">
+            <i class="fa-brands fa-whatsapp" style="font-size: 20px;"></i> Gabung Saluran WhatsApp
+          </a>
+        </div>
+      </div>
+
+      <!-- FOOTER COPYRIGHT -->
+      <div class="footer-credit">
+        © juiko coders
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // UBAH PIN LU DI SINI BRO:
+    const PIN_ADMIN = "9900221188";  // Ganti 1234 jadi PIN rahasia admin lu
+    const PIN_MEMBER = "0000"; // Ganti 0000 jadi PIN rahasia member lu
+
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    let audioCtx;
+    
+    function playBeep(type = 'normal') {
+      try {
+        if (!audioCtx) audioCtx = new AudioContext();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.type = (type === 'error') ? 'sawtooth' : 'sine';
+        osc.frequency.value = (type === 'error') ? 300 : (type === 'success' ? 1200 : 800);
+        gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+        osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+      } catch (err) {
+        console.log("Audio diblokir oleh browser, tapi aman, sistem tetep jalan.");
+      }
+    }
+    document.addEventListener('input', () => playBeep('normal'));
+
+    function checkLogin() {
+      playBeep();
+      const pin = document.getElementById('pinInput').value;
+      const bgMusic = document.getElementById('bgMusic');
+      
+      let role = "";
+      if (pin === PIN_ADMIN) role = "ADMIN";
+      else if (pin === PIN_MEMBER) role = "MEMBER";
+
+      if (role !== "") {
+        playBeep('success');
+        
+        if (role === "MEMBER") {
+          document.getElementById('nav-account').style.display = 'none';
+        } else {
+          document.getElementById('nav-account').style.display = 'flex';
+        }
+
+        bgMusic.play().catch(e => console.log("Gagal putar lagu otomatis", e));
+
+        document.getElementById('loginScreen').style.opacity = '0';
+        setTimeout(() => {
+          document.getElementById('loginScreen').style.display = 'none';
+          document.getElementById('mainApp').style.display = 'block';
+          switchTab('tab-main-menu'); 
+        }, 500);
+
+        Swal.fire({ title: 'Akses Diberikan', text: `Login sebagai ${role}`, icon: 'success', background: '#1e293b', color: '#00ff88', confirmButtonColor: '#00ff88' });
+      } else {
+        playBeep('error');
+        Swal.fire({ title: 'Akses Ditolak!', text: 'PIN Salah!', icon: 'error', background: '#1e293b', color: '#ff4757', confirmButtonColor: '#ff4757' });
+      }
+    }
+
+    function logout() {
+      playBeep();
+      const bgMusic = document.getElementById('bgMusic');
+      bgMusic.pause(); 
+      bgMusic.currentTime = 0; 
+
+      document.getElementById('loginScreen').style.display = 'flex';
+      setTimeout(() => document.getElementById('loginScreen').style.opacity = '1', 50);
+      document.getElementById('mainApp').style.display = 'none';
+      document.getElementById('pinInput').value = '';
+    }
+
+    function toggleSidebar() {
+      playBeep();
+      document.getElementById('sidebar').classList.toggle('active');
+    }
+
+    function switchTab(tabId) {
+      playBeep();
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      
+      document.getElementById(tabId).classList.add('active');
+      
+      const navItemIds = {
+        'tab-main-menu': 'nav-main-menu',
+        'tab-alight': 'nav-alight',
+        'tab-tools': 'nav-tools',
+        'tab-account': 'nav-account',
+        'tab-developer': 'nav-developer'
+      };
+      const navItemId = navItemIds[tabId];
+      if (navItemId) {
+          document.getElementById(navItemId).classList.add('active');
+      }
+
+      document.getElementById('sidebar').classList.remove('active'); 
+    }
+
+    const logOutput = document.getElementById('logOutput');
+    function addLog(msg) {
+      const time = new Date().toLocaleTimeString('id-ID', { hour12: false });
+      logOutput.innerText += `\n[${time}] ${msg}`;
+      logOutput.scrollTop = logOutput.scrollHeight;
+    }
+    function copyTerminalLog() {
+      playBeep();
+      navigator.clipboard.writeText(logOutput.innerText);
+      Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Log disalin!', showConfirmButton: false, timer: 1500, background: '#1e293b', color: '#fff' });
+    }
+
+    async function sendEmail() {
+      playBeep();
+      const email = document.getElementById('email').value.trim();
+      if (!email) return Swal.fire('Error', 'Isi email dulu!', 'warning');
+      addLog('> Mengirim eksekusi ke ' + email);
+      try {
+        const res = await fetch('/api/send', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email }) });
+        addLog('> Sukses kirim email.');
+        Swal.fire('Terkirim!', 'Cek email buat ngambil Magic Link.', 'success');
+      } catch (err) { addLog('! Error: ' + err.message); }
+    }
+
+    async function verifyAcc() {
+      playBeep();
+      const email = document.getElementById('email').value.trim();
+      const link = document.getElementById('magicLink').value.trim();
+      if (!email || !link) return Swal.fire('Error', 'Email & Link wajib isi!', 'warning');
+      addLog('> Verifikasi akun berjalan...');
+      try {
+        const res = await fetch('/api/verify', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, magicLink: link }) });
+        addLog('> Verifikasi SELESAI! Akun Premium Aktif.');
+        playBeep('success');
+        Swal.fire('BERHASIL!', 'Akun Premium sudah jadi.', 'success');
+      } catch (err) { addLog('! Error: ' + err.message); }
+    }
+
+    async function processDownload() {
+      playBeep();
+      const platform = document.getElementById('dlPlatform').value;
+      const url = document.getElementById('dlUrl').value.trim();
+      if (!url) return Swal.fire('Error', 'Masukin link videonya dulu bro!', 'warning');
+      addLog(`> Memproses link ${platform}...`);
+      Swal.fire({ title: 'Mengekstrak File...', text: 'Tunggu bentar ya bro.', allowOutsideClick: false, background: '#1e293b', color: '#00ff88', didOpen: () => { Swal.showLoading(); } });
+      try {
+        const res = await fetch('/api/download', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ platform, url }) });
+        const data = await res.json();
+        if (!res.ok || !data.status) throw new Error(data.error || 'Server gagal ngambil file.');
+        addLog('> Sukses! Link download berhasil digenerate.');
+        playBeep('success');
+        Swal.fire({ title: 'File Ketemu! 🎉', h
