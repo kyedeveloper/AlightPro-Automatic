@@ -8,7 +8,6 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Fira+Code&display=swap" rel="stylesheet">
   <style>
-    /* CSS persis seperti home & generate */
     :root { --bg-color: #020617; --card-bg: rgba(15, 23, 42, 0.75); --primary: #00ff88; --text-main: #f8fafc; --text-muted: #94a3b8; --border: rgba(255, 255, 255, 0.1); --sidebar-width: 270px; }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
     body { background-color: var(--bg-color); color: var(--text-main); overflow-x: hidden; min-height: 100vh; background-image: radial-gradient(circle at 10% 20%, rgba(0, 255, 136, 0.05) 0%, transparent 40%), radial-gradient(circle at 90% 80%, rgba(99, 102, 241, 0.05) 0%, transparent 40%); background-attachment: fixed; }
@@ -24,7 +23,8 @@
     .glass-card h3 { font-size: 16px; margin-bottom: 18px; display: flex; align-items: center; gap: 10px; font-weight: 800; }
     .glass-card h3 i { color: var(--primary); }
     .modern-input { width: 100%; padding: 16px; margin-bottom: 15px; border-radius: 14px; border: 1px solid var(--border); background: rgba(0,0,0,0.5); color: #fff; font-size: 15px; outline: none; }
-    .modern-btn { width: 100%; padding: 16px; border-radius: 14px; border: none; background: var(--primary); color: #000; font-weight: 800; font-size: 15px; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; }
+    .modern-btn { width: 100%; padding: 16px; border-radius: 14px; border: none; background: var(--primary); color: #000; font-weight: 800; font-size: 15px; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; transition: 0.2s; }
+    .modern-btn:disabled { opacity: 0.6; cursor: not-allowed; }
   </style>
 </head>
 <body>
@@ -55,7 +55,7 @@
         <option value="youtube_audio">YouTube Engine (MP3)</option>
       </select>
       <input type="text" id="dlUrl" class="modern-input" placeholder="Paste URL Source di sini...">
-      <button class="modern-btn" onclick="apiDownloadMedia()"><i class="fa-solid fa-download"></i> Eksekusi Tautan Media</button>
+      <button id="dlBtn" class="modern-btn" onclick="apiDownloadMedia()"><i class="fa-solid fa-download"></i> Eksekusi Tautan Media</button>
     </div>
   </main>
 
@@ -78,16 +78,35 @@
     async function apiDownloadMedia() {
       const plat = document.getElementById('dlPlatform').value;
       const url = document.getElementById('dlUrl').value.trim();
-      if(!url) return alert("Masukkan link target!");
-      
-      alert("Memproses Eksekusi Tautan...");
+      const btn = document.getElementById('dlBtn');
+
+      if (!url) return alert("Masukkan link target terlebih dahulu!");
+
+      // Ubah tombol jadi status loading agar user tahu sistem sedang bekerja
+      btn.disabled = true;
+      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Sedang Mengekstrak...`;
+
       try {
-        const res = await fetch('/api/download', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({platform:plat, url}) });
+        const res = await fetch('/api/download', { 
+          method: 'POST', 
+          headers: { 'Content-Type': 'application/json' }, 
+          body: JSON.stringify({ platform: plat, url }) 
+        });
+        
         const data = await res.json();
-        if(!res.ok || !data.status) throw new Error(data.error || "Gagal extract link.");
+        
+        if (!res.ok || !data.status) {
+          throw new Error(data.error || "Gagal mengambil tautan unduhan.");
+        }
+
+        // Buka hasil link download di tab baru secara otomatis
         window.open(data.downloadUrl, '_blank');
-      } catch(e) { 
+      } catch (e) {
         alert("Gagal: " + e.message);
+      } finally {
+        // Kembalikan tombol ke semula
+        btn.disabled = false;
+        btn.innerHTML = `<i class="fa-solid fa-download"></i> Eksekusi Tautan Media`;
       }
     }
   </script>
