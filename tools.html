@@ -38,18 +38,17 @@
 <body>
   <audio id="bgAudio" loop><source src="lagu.mp3" type="audio/mpeg"></audio>
 
-  <!-- WINDOW / MODAL POPUP HASIL DOWNLOAD -->
+  <!-- MODAL HASIL DOWNLOAD -->
   <div id="resultModal">
     <div class="result-box">
       <div style="width: 50px; height: 50px; margin: 0 auto 15px; background: rgba(0,255,136,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid var(--primary);">
         <i class="fa-solid fa-circle-check" style="font-size: 24px; color: var(--primary);"></i>
       </div>
       <h3 style="color: #fff; font-size: 18px; font-weight: 800; margin-bottom: 8px;">Media Berhasil Diekstrak!</h3>
-      <p id="modalDesc" style="color: var(--text-muted); font-size: 12px; margin-bottom: 20px;">Tekan tombol di bawah untuk langsung menyimpan file ke folder Unduhan (Downloads) perangkatmu.</p>
+      <p style="color: var(--text-muted); font-size: 12px; margin-bottom: 20px;">Klik tombol di bawah untuk memicu sistem unduhan APK ke folder Downloads HP.</p>
       
-      <!-- Tombol Unduh Interaktif -->
       <button id="downloadActionBtn" class="modern-btn" style="margin-bottom: 12px;" onclick="triggerDownload()">
-        <i class="fa-solid fa-download"></i> UNDUH SEKARANG
+        <i class="fa-solid fa-download"></i> UNDUH KE PERANGKAT
       </button>
       <button class="modern-btn" style="background: rgba(255,255,255,0.08); color: #fff; border: 1px solid var(--border); box-shadow: none;" onclick="closeResultModal()">Tutup Jendela</button>
     </div>
@@ -106,38 +105,32 @@
       document.getElementById('resultModal').style.display = 'none';
     }
 
-    // Fungsi untuk memicu unduhan langsung ke folder Download HP
-    async function triggerDownload() {
+    // Fungsi pemicu unduhan khusus lingkungan APK WebView Android
+    function triggerDownload() {
       if (!globalDownloadUrl) return;
-      
+
       const btn = document.getElementById('downloadActionBtn');
-      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Mengunduh ke Perangkat...`;
-      
+      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Memulai Unduhan...`;
+
       try {
-        // Coba unduh via Fetch Blob agar masuk ke folder unduhan bawaan browser secara otomatis
-        const response = await fetch(globalDownloadUrl);
-        const blob = await response.blob();
-        const blobUrl = window.URL.createObjectURL(blob);
-        
+        // Buat elemen <a> dinamis dengan atribut 'download' dan 'target="_blank"'
+        // Ini akan memicu Android WebView untuk menangkap URL dan melemparkannya ke DownloadManager bawaan HP
         const a = document.createElement('a');
-        a.href = blobUrl;
-        a.download = `AlightPro_${Date.now()}.mp4`; // Format nama file otomatis
+        a.href = globalDownloadUrl;
+        a.setAttribute('download', 'AlightPro_Media_' + Date.now() + '.mp4');
+        a.setAttribute('target', '_blank');
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
-        window.URL.revokeObjectURL(blobUrl);
 
-        btn.innerHTML = `<i class="fa-solid fa-check"></i> Berhasil Diunduh!`;
+        btn.innerHTML = `<i class="fa-solid fa-check"></i> Proses Unduh Dimulai!`;
         setTimeout(() => {
           closeResultModal();
-          btn.innerHTML = `<i class="fa-solid fa-download"></i> UNDUH SEKARANG`;
+          btn.innerHTML = `<i class="fa-solid fa-download"></i> UNDUH KE PERANGKAT`;
         }, 1500);
-
-      } catch (err) {
-        // Fallback jika diblokir CORS oleh server sumber: buka langsung di tab baru
-        window.open(globalDownloadUrl, '_blank');
-        closeResultModal();
-        btn.innerHTML = `<i class="fa-solid fa-download"></i> UNDUH SEKARANG`;
+      } catch (e) {
+        // Fallback mutlak jika WebView menolak
+        window.location.href = globalDownloadUrl;
       }
     }
 
@@ -164,7 +157,6 @@
           throw new Error(data.error || "Gagal mengambil tautan unduhan.");
         }
 
-        // Simpan URL dan tampilkan modal popup
         globalDownloadUrl = data.downloadUrl;
         document.getElementById('resultModal').style.display = 'flex';
 
