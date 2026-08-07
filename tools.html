@@ -29,7 +29,7 @@
     .modern-btn { width: 100%; padding: 16px; border-radius: 14px; border: none; background: var(--primary); color: #000; font-weight: 800; font-size: 15px; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; transition: 0.2s; text-decoration: none; }
     .modern-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
-    /* MODAL KHUSUS HASIL EKSTRAK MEDIA */
+    /* MODAL HASIL EKSTRAK */
     #resultModal { position: fixed; inset: 0; background: rgba(2, 6, 23, 0.85); backdrop-filter: blur(12px); display: none; justify-content: center; align-items: center; z-index: 100000; padding: 20px; }
     .result-box { background: #0f172a; border: 1px solid rgba(0, 255, 136, 0.4); border-radius: 22px; padding: 25px; width: 100%; max-width: 400px; text-align: center; box-shadow: 0 25px 50px rgba(0,0,0,0.9); animation: zoomIn 0.3s ease; }
     @keyframes zoomIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
@@ -45,12 +45,12 @@
         <i class="fa-solid fa-circle-check" style="font-size: 24px; color: var(--primary);"></i>
       </div>
       <h3 style="color: #fff; font-size: 18px; font-weight: 800; margin-bottom: 8px;">Media Berhasil Diekstrak!</h3>
-      <p style="color: var(--text-muted); font-size: 12px; margin-bottom: 20px;">File media kamu sudah siap untuk diputar atau diunduh ke perangkat.</p>
+      <p id="modalDesc" style="color: var(--text-muted); font-size: 12px; margin-bottom: 20px;">Tekan tombol di bawah untuk langsung menyimpan file ke folder Unduhan (Downloads) perangkatmu.</p>
       
-      <!-- Tombol Aksi -->
-      <a id="downloadLinkBtn" href="#" target="_blank" class="modern-btn" style="margin-bottom: 12px;">
+      <!-- Tombol Unduh Interaktif -->
+      <button id="downloadActionBtn" class="modern-btn" style="margin-bottom: 12px;" onclick="triggerDownload()">
         <i class="fa-solid fa-download"></i> UNDUH SEKARANG
-      </a>
+      </button>
       <button class="modern-btn" style="background: rgba(255,255,255,0.08); color: #fff; border: 1px solid var(--border); box-shadow: none;" onclick="closeResultModal()">Tutup Jendela</button>
     </div>
   </div>
@@ -92,6 +92,8 @@
       window.location.replace('home.html');
     }
 
+    let globalDownloadUrl = "";
+
     function toggleSidebar() { document.getElementById('sysSidebar').classList.toggle('active'); }
     function executeLogout() { sessionStorage.clear(); window.location.href = 'index.html'; }
     function toggleAudio() {
@@ -102,6 +104,41 @@
 
     function closeResultModal() {
       document.getElementById('resultModal').style.display = 'none';
+    }
+
+    // Fungsi untuk memicu unduhan langsung ke folder Download HP
+    async function triggerDownload() {
+      if (!globalDownloadUrl) return;
+      
+      const btn = document.getElementById('downloadActionBtn');
+      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Mengunduh ke Perangkat...`;
+      
+      try {
+        // Coba unduh via Fetch Blob agar masuk ke folder unduhan bawaan browser secara otomatis
+        const response = await fetch(globalDownloadUrl);
+        const blob = await response.blob();
+        const blobUrl = window.URL.createObjectURL(blob);
+        
+        const a = document.createElement('a');
+        a.href = blobUrl;
+        a.download = `AlightPro_${Date.now()}.mp4`; // Format nama file otomatis
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(blobUrl);
+
+        btn.innerHTML = `<i class="fa-solid fa-check"></i> Berhasil Diunduh!`;
+        setTimeout(() => {
+          closeResultModal();
+          btn.innerHTML = `<i class="fa-solid fa-download"></i> UNDUH SEKARANG`;
+        }, 1500);
+
+      } catch (err) {
+        // Fallback jika diblokir CORS oleh server sumber: buka langsung di tab baru
+        window.open(globalDownloadUrl, '_blank');
+        closeResultModal();
+        btn.innerHTML = `<i class="fa-solid fa-download"></i> UNDUH SEKARANG`;
+      }
     }
 
     async function apiDownloadMedia() {
@@ -127,8 +164,8 @@
           throw new Error(data.error || "Gagal mengambil tautan unduhan.");
         }
 
-        // Tampilkan Jendela/Modal khusus hasil unduhan
-        document.getElementById('downloadLinkBtn').href = data.downloadUrl;
+        // Simpan URL dan tampilkan modal popup
+        globalDownloadUrl = data.downloadUrl;
         document.getElementById('resultModal').style.display = 'flex';
 
       } catch (e) {
@@ -140,5 +177,4 @@
     }
   </script>
 </body>
-  </html>
-      
+</html>
