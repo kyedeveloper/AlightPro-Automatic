@@ -105,9 +105,41 @@
       document.getElementById('resultModal').style.display = 'none';
     }
 
-    // Fungsi pemicu unduhan khusus lingkungan APK WebView Android
-    function triggerDownload() {
+        function triggerDownload() {
       if (!globalDownloadUrl) return;
+
+      const btn = document.getElementById('downloadActionBtn');
+      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Memulai Unduhan...`;
+
+      try {
+        // Metode 1: Paksa buat link dengan atribut download dan target _blank
+        const a = document.createElement('a');
+        a.href = globalDownloadUrl;
+        a.download = 'AlightPro_' + Date.now() + '.mp4';
+        a.target = '_blank';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+
+        // Metode 2: Cadangan iframe tersembunyi khusus APK builder agar memaksa proses download di background
+        const iframe = document.createElement('iframe');
+        iframe.style.display = 'none';
+        iframe.src = globalDownloadUrl;
+        document.body.appendChild(iframe);
+        setTimeout(() => { document.body.removeChild(iframe); }, 5000);
+
+        btn.innerHTML = `<i class="fa-solid fa-check"></i> Unduhan Dipicu!`;
+        setTimeout(() => {
+          closeResultModal();
+          btn.innerHTML = `<i class="fa-solid fa-download"></i> UNDUH KE PERANGKAT`;
+        }, 1500);
+
+      } catch (e) {
+        window.open(globalDownloadUrl, '_blank');
+        closeResultModal();
+      }
+    }
+
 
       const btn = document.getElementById('downloadActionBtn');
       btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Memulai Unduhan...`;
