@@ -11,6 +11,7 @@
     :root { --bg-color: #020617; --card-bg: rgba(15, 23, 42, 0.75); --primary: #00ff88; --text-main: #f8fafc; --text-muted: #94a3b8; --border: rgba(255, 255, 255, 0.1); --sidebar-width: 270px; }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
     body { background-color: var(--bg-color); color: var(--text-main); overflow-x: hidden; min-height: 100vh; background-image: radial-gradient(circle at 10% 20%, rgba(0, 255, 136, 0.05) 0%, transparent 40%), radial-gradient(circle at 90% 80%, rgba(99, 102, 241, 0.05) 0%, transparent 40%); background-attachment: fixed; }
+    
     .sys-topbar { position: fixed; top: 0; left: 0; width: 100%; height: 70px; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(15px); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; z-index: 1000; }
     .sys-title { font-size: 16px; font-weight: 800; color: var(--primary); text-transform: uppercase; }
     .sys-sidebar { position: fixed; top: 0; left: -100%; width: var(--sidebar-width); height: 100vh; background: rgba(15, 23, 42, 0.98); backdrop-filter: blur(20px); border-right: 1px solid var(--border); z-index: 9999; padding-top: 85px; transition: left 0.4s; }
@@ -19,16 +20,40 @@
     .nav-item:hover, .nav-item.active { background: rgba(0, 255, 136, 0.08); border-left-color: var(--primary); color: var(--primary); }
     .sys-content { padding: 95px 20px 40px; max-width: 650px; margin: 0 auto; }
     .floating-fab { position: fixed; bottom: 25px; left: 20px; width: 55px; height: 55px; background: var(--primary); color: #000; border-radius: 50%; border: none; font-size: 20px; cursor: pointer; z-index: 9998; display: flex; align-items: center; justify-content: center; }
+    
     .glass-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 20px; padding: 25px; margin-bottom: 20px; backdrop-filter: blur(10px); }
     .glass-card h3 { font-size: 16px; margin-bottom: 18px; display: flex; align-items: center; gap: 10px; font-weight: 800; }
     .glass-card h3 i { color: var(--primary); }
+    
     .modern-input { width: 100%; padding: 16px; margin-bottom: 15px; border-radius: 14px; border: 1px solid var(--border); background: rgba(0,0,0,0.5); color: #fff; font-size: 15px; outline: none; }
-    .modern-btn { width: 100%; padding: 16px; border-radius: 14px; border: none; background: var(--primary); color: #000; font-weight: 800; font-size: 15px; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; transition: 0.2s; }
+    .modern-btn { width: 100%; padding: 16px; border-radius: 14px; border: none; background: var(--primary); color: #000; font-weight: 800; font-size: 15px; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; transition: 0.2s; text-decoration: none; }
     .modern-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    /* MODAL KHUSUS HASIL EKSTRAK MEDIA */
+    #resultModal { position: fixed; inset: 0; background: rgba(2, 6, 23, 0.85); backdrop-filter: blur(12px); display: none; justify-content: center; align-items: center; z-index: 100000; padding: 20px; }
+    .result-box { background: #0f172a; border: 1px solid rgba(0, 255, 136, 0.4); border-radius: 22px; padding: 25px; width: 100%; max-width: 400px; text-align: center; box-shadow: 0 25px 50px rgba(0,0,0,0.9); animation: zoomIn 0.3s ease; }
+    @keyframes zoomIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
   </style>
 </head>
 <body>
   <audio id="bgAudio" loop><source src="lagu.mp3" type="audio/mpeg"></audio>
+
+  <!-- WINDOW / MODAL POPUP HASIL DOWNLOAD -->
+  <div id="resultModal">
+    <div class="result-box">
+      <div style="width: 50px; height: 50px; margin: 0 auto 15px; background: rgba(0,255,136,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid var(--primary);">
+        <i class="fa-solid fa-circle-check" style="font-size: 24px; color: var(--primary);"></i>
+      </div>
+      <h3 style="color: #fff; font-size: 18px; font-weight: 800; margin-bottom: 8px;">Media Berhasil Diekstrak!</h3>
+      <p style="color: var(--text-muted); font-size: 12px; margin-bottom: 20px;">File media kamu sudah siap untuk diputar atau diunduh ke perangkat.</p>
+      
+      <!-- Tombol Aksi -->
+      <a id="downloadLinkBtn" href="#" target="_blank" class="modern-btn" style="margin-bottom: 12px;">
+        <i class="fa-solid fa-download"></i> UNDUH SEKARANG
+      </a>
+      <button class="modern-btn" style="background: rgba(255,255,255,0.08); color: #fff; border: 1px solid var(--border); box-shadow: none;" onclick="closeResultModal()">Tutup Jendela</button>
+    </div>
+  </div>
 
   <header class="sys-topbar">
     <div class="sys-title">Alight Pro Dashboard</div>
@@ -75,6 +100,10 @@
       else { audio.pause(); document.getElementById('audioIcon').className="fa-solid fa-volume-xmark"; }
     }
 
+    function closeResultModal() {
+      document.getElementById('resultModal').style.display = 'none';
+    }
+
     async function apiDownloadMedia() {
       const plat = document.getElementById('dlPlatform').value;
       const url = document.getElementById('dlUrl').value.trim();
@@ -82,7 +111,6 @@
 
       if (!url) return alert("Masukkan link target terlebih dahulu!");
 
-      // Ubah tombol jadi status loading agar user tahu sistem sedang bekerja
       btn.disabled = true;
       btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Sedang Mengekstrak...`;
 
@@ -99,16 +127,18 @@
           throw new Error(data.error || "Gagal mengambil tautan unduhan.");
         }
 
-        // Buka hasil link download di tab baru secara otomatis
-        window.open(data.downloadUrl, '_blank');
+        // Tampilkan Jendela/Modal khusus hasil unduhan
+        document.getElementById('downloadLinkBtn').href = data.downloadUrl;
+        document.getElementById('resultModal').style.display = 'flex';
+
       } catch (e) {
         alert("Gagal: " + e.message);
       } finally {
-        // Kembalikan tombol ke semula
         btn.disabled = false;
         btn.innerHTML = `<i class="fa-solid fa-download"></i> Eksekusi Tautan Media`;
       }
     }
   </script>
 </body>
-</html>
+  </html>
+      
