@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Alight Pro Hub | Secure Login</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Fira+Code:wght@500&display=swap" rel="stylesheet">
+  <style>
+    :root { --bg-color: #020617; --card-bg: rgba(15, 23, 42, 0.75); --primary: #00ff88; --text-main: #f8fafc; --text-muted: #94a3b8; --border: rgba(255, 255, 255, 0.1); }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+    body { background-color: var(--bg-color); color: var(--text-main); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; background-image: radial-gradient(circle at 50% 50%, rgba(0, 255, 136, 0.08) 0%, transparent 60%); }
+    .login-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 24px; padding: 35px 25px; width: 100%; max-width: 380px; backdrop-filter: blur(15px); box-shadow: 0 20px 40px rgba(0,0,0,0.8); text-align: center; }
+    .modern-input { width: 100%; padding: 16px; margin-bottom: 15px; border-radius: 14px; border: 1px solid var(--border); background: rgba(0,0,0,0.5); color: #fff; font-size: 15px; text-align: center; outline: none; font-family: 'Fira Code', monospace; letter-spacing: 2px; }
+    .modern-input:focus { border-color: var(--primary); }
+    .modern-btn { width: 100%; padding: 16px; border-radius: 14px; border: none; background: var(--primary); color: #000; font-weight: 800; font-size: 15px; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; }
+    .custom-modal { position: fixed; inset: 0; background: rgba(2, 6, 23, 0.85); backdrop-filter: blur(12px); display: none; justify-content: center; align-items: center; z-index: 100000; padding: 20px; }
+    .modal-content { background: #0f172a; border-radius: 22px; padding: 25px; width: 100%; max-width: 360px; text-align: center; border: 1px solid var(--primary); }
+  </style>
+</head>
+<body>
+
+  <!-- MODAL DIAGNOSTIK SERVER -->
+  <div id="sysDiagModal" class="custom-modal">
+    <div class="modal-content" style="border-color: var(--primary);">
+      <i class="fa-solid fa-microchip" style="font-size: 35px; color: var(--primary); margin-bottom: 12px;"></i>
+      <h3 style="color: var(--primary); margin-bottom: 10px; font-weight: 800;">System Diagnostics</h3>
+      <div style="text-align: left; background: rgba(0,0,0,0.5); padding: 12px; border-radius: 10px; font-family: 'Fira Code', monospace; font-size: 11px; color: #fff; margin-bottom: 20px; line-height: 1.6;">
+        > Vercel Edge Node: OK<br>
+        > Database Secure: Active<br>
+        > Latency: 18ms (Optimal)<br>
+        > Firewall Status: Shielded
+      </div>
+      <button class="modern-btn" onclick="document.getElementById('sysDiagModal').style.display='none'">Tutup</button>
+    </div>
+  </div>
+
+  <!-- MODAL BANTUAN PIN -->
+  <div id="emergencyModal" class="custom-modal">
+    <div class="modal-content" style="border-color: #ffb703;">
+      <i class="fa-solid fa-key" style="font-size: 35px; color: #ffb703; margin-bottom: 12px;"></i>
+      <h3 style="color: #ffb703; margin-bottom: 10px; font-weight: 800;">Informasi Akses PIN</h3>
+      <p style="color: var(--text-muted); font-size: 13px; line-height: 1.6; margin-bottom: 20px;">
+        Gunakan PIN akses yang valid:<br>
+        • <strong style="color:#fff;">Admin:</strong> <code>990055</code><br>
+        • <strong style="color:#fff;">Member:</strong> <code>0000</code><br>
+        • <strong style="color:#fff;">Visitor:</strong> <code>visitor</code>
+      </p>
+      <button class="modern-btn" style="background: #ffb703; color: #000;" onclick="document.getElementById('emergencyModal').style.display='none'">Mengerti</button>
+    </div>
+  </div>
+
+  <div class="login-card">
+    <div style="width: 70px; height: 70px; margin: 0 auto 15px; background: rgba(0,255,136,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid var(--primary);">
+      <i class="fa-solid fa-shield-halved" style="font-size: 30px; color: var(--primary);"></i>
+    </div>
+    <h2 style="font-size: 20px; font-weight: 800; margin-bottom: 5px;">Alight Pro Hub</h2>
+    <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 20px;">Masukkan PIN otorisasi sistem</p>
+    
+    <input type="password" id="pinInput" class="modern-input" placeholder="••••" autocomplete="off">
+    <button class="modern-btn" onclick="executeLogin()"><i class="fa-solid fa-fingerprint"></i> Autentikasi Sistem</button>
+
+    <div style="display: flex; gap: 10px; margin-top: 12px;">
+      <button onclick="document.getElementById('sysDiagModal').style.display='flex'" style="flex: 1; padding: 12px; background: rgba(0,255,136,0.05); border: 1px solid var(--border); border-radius: 12px; color: var(--primary); font-size: 12px; font-weight: 700; cursor: pointer;"><i class="fa-solid fa-network-wired"></i> Cek Node</button>
+      <button onclick="document.getElementById('emergencyModal').style.display='flex'" style="flex: 1; padding: 12px; background: rgba(255,183,3,0.05); border: 1px solid rgba(255,183,3,0.3); border-radius: 12px; color: #ffb703; font-size: 12px; font-weight: 700; cursor: pointer;"><i class="fa-solid fa-circle-question"></i> Bantuan PIN</button>
+    </div>
+  </div>
+
+  <script>
+    function executeLogin() {
+      const pin = document.getElementById('pinInput').value.trim();
+      let role = "";
+      if (pin === "990055") role = "ADMIN";
+      else if (pin === "0000") role = "MEMBER";
+      else if (pin === "visitor") role = "VISITOR";
+
+      if (role) {
+        sessionStorage.setItem('alightRole', role);
+        window.location.href = "home.html";
+      } else {
+        alert("PIN Otentikasi Salah!");
+      }
+    }
+    document.getElementById("pinInput").addEventListener("keypress", function(event) {
+      if (event.key === "Enter") executeLogin();
+    });
+  </script>
+</body>
+</html>
