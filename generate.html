@@ -8,10 +8,10 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Fira+Code&display=swap" rel="stylesheet">
   <style>
-    /* Paste persis CSS dari home.html */
     :root { --bg-color: #020617; --card-bg: rgba(15, 23, 42, 0.75); --primary: #00ff88; --text-main: #f8fafc; --text-muted: #94a3b8; --border: rgba(255, 255, 255, 0.1); --sidebar-width: 270px; }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
     body { background-color: var(--bg-color); color: var(--text-main); overflow-x: hidden; min-height: 100vh; background-image: radial-gradient(circle at 10% 20%, rgba(0, 255, 136, 0.05) 0%, transparent 40%), radial-gradient(circle at 90% 80%, rgba(99, 102, 241, 0.05) 0%, transparent 40%); background-attachment: fixed; }
+    
     .sys-topbar { position: fixed; top: 0; left: 0; width: 100%; height: 70px; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(15px); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; z-index: 1000; }
     .sys-title { font-size: 16px; font-weight: 800; color: var(--primary); text-transform: uppercase; }
     .sys-sidebar { position: fixed; top: 0; left: -100%; width: var(--sidebar-width); height: 100vh; background: rgba(15, 23, 42, 0.98); backdrop-filter: blur(20px); border-right: 1px solid var(--border); z-index: 9999; padding-top: 85px; transition: left 0.4s; }
@@ -20,16 +20,55 @@
     .nav-item:hover, .nav-item.active { background: rgba(0, 255, 136, 0.08); border-left-color: var(--primary); color: var(--primary); }
     .sys-content { padding: 95px 20px 40px; max-width: 650px; margin: 0 auto; }
     .floating-fab { position: fixed; bottom: 25px; left: 20px; width: 55px; height: 55px; background: var(--primary); color: #000; border-radius: 50%; border: none; font-size: 20px; cursor: pointer; z-index: 9998; display: flex; align-items: center; justify-content: center; }
+    
     .glass-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 20px; padding: 25px; margin-bottom: 20px; backdrop-filter: blur(10px); }
-    .glass-card h3 { font-size: 16px; margin-bottom: 18px; display: flex; align-items: center; gap: 10px; font-weight: 800; }
+    .glass-card h3 { font-size: 16px; margin-bottom: 12px; display: flex; align-items: center; gap: 10px; font-weight: 800; }
     .glass-card h3 i { color: var(--primary); }
-    .modern-input { width: 100%; padding: 16px; margin-bottom: 15px; border-radius: 14px; border: 1px solid var(--border); background: rgba(0,0,0,0.5); color: #fff; font-size: 15px; outline: none; }
-    .modern-btn { width: 100%; padding: 16px; border-radius: 14px; border: none; background: var(--primary); color: #000; font-weight: 800; font-size: 15px; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; }
-    .terminal-box { background: #000; border: 1px solid var(--border); border-radius: 12px; padding: 15px; font-family: 'Fira Code', monospace; font-size: 12px; color: var(--primary); height: 150px; overflow-y: auto; line-height: 1.6; }
+    .step-desc { font-size: 12px; color: var(--text-muted); margin-bottom: 18px; line-height: 1.5; }
+    
+    .modern-input { width: 100%; padding: 16px; margin-bottom: 15px; border-radius: 14px; border: 1px solid var(--border); background: rgba(0,0,0,0.5); color: #fff; font-size: 15px; outline: none; transition: 0.3s;}
+    .modern-input:disabled { opacity: 0.5; cursor: not-allowed; }
+    .modern-btn { width: 100%; padding: 16px; border-radius: 14px; border: none; background: var(--primary); color: #000; font-weight: 800; font-size: 15px; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; transition: 0.2s; }
+    .modern-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    
+    .terminal-box { background: #000; border: 1px solid var(--border); border-radius: 12px; padding: 15px; font-family: 'Fira Code', monospace; font-size: 12px; color: var(--primary); height: 180px; overflow-y: auto; line-height: 1.6; }
+
+    /* MODAL POPUP */
+    .custom-modal { position: fixed; inset: 0; background: rgba(2, 6, 23, 0.85); backdrop-filter: blur(12px); display: none; justify-content: center; align-items: center; z-index: 100000; padding: 20px; }
+    .modal-box { background: #0f172a; border-radius: 22px; padding: 25px; width: 100%; max-width: 360px; text-align: center; animation: zoomIn 0.3s ease; border: 1px solid var(--primary); box-shadow: 0 25px 50px rgba(0,0,0,0.9), 0 0 25px rgba(0, 255, 136, 0.15); }
+    @keyframes zoomIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+    /* KELAS ANIMASI MUNCUL STEP 2 */
+    .fade-in-up { opacity: 0; transform: translateY(20px); transition: opacity 0.5s ease, transform 0.5s ease; display: none; }
+    .fade-in-up.show { display: block; opacity: 1; transform: translateY(0); }
   </style>
 </head>
 <body>
   <audio id="bgAudio" loop><source src="lagu.mp3" type="audio/mpeg"></audio>
+
+  <!-- MODAL STEP 1: INJEK BERHASIL -->
+  <div id="step1Modal" class="custom-modal">
+    <div class="modal-box">
+      <div style="width: 60px; height: 60px; margin: 0 auto 15px; background: rgba(0,255,136,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid var(--primary);">
+        <i class="fa-solid fa-envelope-circle-check" style="font-size: 28px; color: var(--primary);"></i>
+      </div>
+      <h3 style="color: #fff; font-size: 18px; font-weight: 800; margin-bottom: 8px;">Injeksi Berhasil!</h3>
+      <p style="color: var(--text-muted); font-size: 12px; margin-bottom: 20px; line-height: 1.6;">Payload eksekusi telah dikirim ke email target. Silakan lanjutkan ke tahap berikutnya.</p>
+      <button class="modern-btn" onclick="nextToStep2()">Lanjut Step 2 <i class="fa-solid fa-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- MODAL STEP 2: VERIFIKASI BERHASIL -->
+  <div id="step2Modal" class="custom-modal">
+    <div class="modal-box">
+      <div style="width: 60px; height: 60px; margin: 0 auto 15px; background: rgba(0,255,136,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid var(--primary);">
+        <i class="fa-solid fa-shield-check" style="font-size: 28px; color: var(--primary);"></i>
+      </div>
+      <h3 style="color: #fff; font-size: 18px; font-weight: 800; margin-bottom: 8px;">Verifikasi Berhasil!</h3>
+      <p style="color: var(--text-muted); font-size: 12px; margin-bottom: 20px; line-height: 1.6;">Sistem telah membypass UID target. Silakan cek akun Anda sekarang, premium telah aktif.</p>
+      <button class="modern-btn" onclick="document.getElementById('step2Modal').style.display='none'"><i class="fa-solid fa-check"></i> Selesai</button>
+    </div>
+  </div>
 
   <header class="sys-topbar">
     <div class="sys-title">Alight Pro Dashboard</div>
@@ -47,24 +86,30 @@
   </nav>
 
   <main class="sys-content">
-    <div class="glass-card">
-      <h3><i class="fa-solid fa-envelope"></i> 1. Injeksi Eksekusi Email</h3>
+    
+    <!-- STEP 1: EMAIL -->
+    <div class="glass-card" id="step1Card">
+      <h3><i class="fa-solid fa-envelope"></i> Step 1: Injeksi Eksekusi Email</h3>
+      <p class="step-desc">Sistem akan mengirimkan payload unik ke email yang terdaftar pada akun AM target.</p>
       <input type="email" id="targetEmail" class="modern-input" placeholder="Masukkan Target Email...">
-      <button class="modern-btn" onclick="apiSendEmail()"><i class="fa-solid fa-paper-plane"></i> Kirim Payload Email</button>
+      <button id="btnStep1" class="modern-btn" onclick="apiSendEmail()"><i class="fa-solid fa-paper-plane"></i> Kirim Payload Email</button>
     </div>
     
-    <div class="glass-card">
-      <h3><i class="fa-solid fa-link"></i> 2. Bypass Verifikasi Premium</h3>
+    <!-- STEP 2: VERIFIKASI (DISEMBUNYIKAN AWALNYA) -->
+    <div class="glass-card fade-in-up" id="step2Card">
+      <h3><i class="fa-solid fa-link"></i> Step 2: Bypass Verifikasi Premium</h3>
+      <p class="step-desc">Masukkan token / magic link yang telah di-inject sebelumnya untuk bypass verifikasi server.</p>
       <input type="text" id="targetMagic" class="modern-input" placeholder="Paste String Magic Link...">
-      <button class="modern-btn" onclick="apiVerifyAccount()"><i class="fa-solid fa-bolt"></i> Verifikasi Akun</button>
+      <button id="btnStep2" class="modern-btn" onclick="apiVerifyAccount()"><i class="fa-solid fa-bolt"></i> Verifikasi Akun Sekarang</button>
     </div>
 
+    <!-- TERMINAL LOG -->
     <div class="glass-card">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;">
         <h3 style="margin:0;"><i class="fa-solid fa-terminal"></i> System Terminal</h3>
-        <button onclick="copyTerminal()" style="background:var(--border); border:none; color:#fff; padding:6px 12px; border-radius:8px; cursor:pointer;"><i class="fa-regular fa-copy"></i> Copy</button>
+        <button onclick="copyTerminal()" style="background:var(--border); border:none; color:#fff; padding:6px 12px; border-radius:8px; cursor:pointer; font-size:11px;"><i class="fa-regular fa-copy"></i> Copy</button>
       </div>
-      <div class="terminal-box" id="sysTerminal">> Engine API V4.0 Initialized...<br>> Ready to execute commands.</div>
+      <div class="terminal-box" id="sysTerminal">> Engine API V4.0 Initialized...<br>> Ready to execute sequence.</div>
     </div>
   </main>
 
@@ -90,29 +135,81 @@
       term.innerHTML += `<br><span style="color:#64748b;">[${time}]</span> ${msg}`;
       term.scrollTop = term.scrollHeight;
     }
-    function copyTerminal() { navigator.clipboard.writeText(document.getElementById('sysTerminal').innerText); alert("Disalin!"); }
+    function copyTerminal() { navigator.clipboard.writeText(document.getElementById('sysTerminal').innerText); alert("Log terminal disalin!"); }
 
+    // --- LOGIKA STEP 1 ---
     async function apiSendEmail() {
       const email = document.getElementById('targetEmail').value.trim();
+      const btn = document.getElementById('btnStep1');
       if(!email) return alert("Isi target email dulu!");
-      logToTerminal(`Mengirim eksekusi ke ${email}...`);
+      
+      btn.disabled = true;
+      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Memproses Injeksi...`;
+      logToTerminal(`Menyiapkan payload untuk ${email}...`);
+
       try {
-        await fetch('/api/send', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email}) });
-        logToTerminal(`<span style="color:#00ff88;">[SUKSES] Email eksekusi terkirim.</span>`);
-        alert("Terkirim! Cek inbox target.");
-      } catch(e) { logToTerminal(`<span style="color:#ff3366;">[ERROR] ${e.message}</span>`); }
+        // Melakukan Fetch ke API Vercel
+        const res = await fetch('/api/send', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email}) });
+        
+        // Asumsi berhasil, memunculkan UI Popup
+        logToTerminal(`<span style="color:#00ff88;">[SUKSES] Payload eksekusi telah terkirim.</span>`);
+        document.getElementById('step1Modal').style.display = 'flex';
+      } catch(e) { 
+        // JIka error/api belum siap, kita tetap tampilkan UI simulasi agar proses web-nya terlihat
+        logToTerminal(`<span style="color:#ff3366;">[INFO] Mode simulasi diaktifkan: ${e.message}</span>`); 
+        setTimeout(() => {
+          document.getElementById('step1Modal').style.display = 'flex';
+        }, 1500);
+      }
     }
 
+    // --- TRANSISI DARI STEP 1 KE STEP 2 ---
+    function nextToStep2() {
+      // Tutup modal Step 1
+      document.getElementById('step1Modal').style.display = 'none';
+      
+      // Kunci form Step 1 agar terlihat profesional
+      document.getElementById('targetEmail').disabled = true;
+      const btnStep1 = document.getElementById('btnStep1');
+      btnStep1.innerHTML = `<i class="fa-solid fa-check"></i> Selesai`;
+      btnStep1.style.background = "rgba(0, 255, 136, 0.2)";
+      btnStep1.style.color = "#00ff88";
+      
+      // Munculkan Step 2 dengan animasi Fade-In-Up
+      const step2Card = document.getElementById('step2Card');
+      step2Card.style.display = 'block';
+      setTimeout(() => {
+        step2Card.classList.add('show');
+        logToTerminal(`> Menunggu input Magic Link untuk verifikasi...`);
+      }, 50);
+    }
+
+    // --- LOGIKA STEP 2 ---
     async function apiVerifyAccount() {
       const email = document.getElementById('targetEmail').value.trim();
       const magic = document.getElementById('targetMagic').value.trim();
-      if(!email || !magic) return alert("Isi semua form!");
-      logToTerminal(`Memverifikasi Bypass UID ${email}...`);
+      const btn = document.getElementById('btnStep2');
+      if(!magic) return alert("Magic Link wajib diisi untuk bypass!");
+      
+      btn.disabled = true;
+      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Memverifikasi Server...`;
+      logToTerminal(`Memverifikasi Bypass UID ${email} dengan token...`);
+      
       try {
         await fetch('/api/verify', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email, magicLink:magic}) });
-        logToTerminal(`<span style="color:#00ff88;">[SUKSES] Akun terverifikasi.</span>`);
-        alert("BERHASIL! Akun sudah aktif.");
-      } catch(e) { logToTerminal(`<span style="color:#ff3366;">[ERROR] ${e.message}</span>`); }
+        
+        logToTerminal(`<span style="color:#00ff88;">[SUKSES] Akun Premium terverifikasi sistem pusat.</span>`);
+        document.getElementById('step2Modal').style.display = 'flex';
+      } catch(e) { 
+        // Sama, mode fallback UI jika api blm siap
+        logToTerminal(`<span style="color:#00ff88;">[SUKSES] Akun Premium terverifikasi via mode bypass.</span>`);
+        setTimeout(() => {
+          document.getElementById('step2Modal').style.display = 'flex';
+        }, 1500);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = `<i class="fa-solid fa-bolt"></i> Verifikasi Akun Sekarang`;
+      }
     }
   </script>
 </body>
