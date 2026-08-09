@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Alight Pro Hub | Settings</title>
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Fira+Code:wght@500&display=swap" rel="stylesheet">
+
+  <style>
+    :root { 
+      --bg-color: #020617; 
+      --card-bg: rgba(15, 23, 42, 0.75); 
+      --primary: #00ff88; /* Warna default hijau */
+      --text-main: #f8fafc; 
+      --text-muted: #94a3b8; 
+      --border: rgba(255, 255, 255, 0.1); 
+      --sidebar-width: 270px; 
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+    
+    body { 
+      background-color: var(--bg-color); 
+      color: var(--text-main); 
+      overflow-x: hidden; 
+      min-height: 100vh; 
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(0, 255, 136, 0.05) 0%, transparent 40%), 
+        radial-gradient(circle at 90% 80%, rgba(99, 102, 241, 0.05) 0%, transparent 40%); 
+      background-attachment: fixed; 
+      transition: background 0.3s;
+    }
+
+    /* TOPBAR & SIDEBAR */
+    .sys-topbar { position: fixed; top: 0; left: 0; width: 100%; height: 70px; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(15px); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; z-index: 1000; }
+    .sys-title { font-size: 16px; font-weight: 800; color: var(--primary); letter-spacing: 1.5px; text-transform: uppercase; }
+    
+    .sys-sidebar { position: fixed; top: 0; left: -100%; width: var(--sidebar-width); height: 100vh; background: rgba(15, 23, 42, 0.98); backdrop-filter: blur(20px); border-right: 1px solid var(--border); z-index: 9999; padding-top: 85px; transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 20px 0 50px rgba(0,0,0,0.8); }
+    .sys-sidebar.active { left: 0; }
+    
+    .nav-item { padding: 16px 24px; display: flex; align-items: center; gap: 15px; color: var(--text-muted); font-size: 14px; font-weight: 600; cursor: pointer; text-decoration: none; transition: 0.3s; border-left: 4px solid transparent; }
+    .nav-item:hover, .nav-item.active { background: rgba(255, 255, 255, 0.05); border-left-color: var(--primary); color: var(--primary); }
+    
+    .sys-content { padding: 95px 20px 40px; max-width: 650px; margin: 0 auto; }
+    
+    .floating-fab { position: fixed; bottom: 25px; left: 20px; width: 55px; height: 55px; background: var(--primary); color: #000; border-radius: 50%; border: none; font-size: 20px; cursor: pointer; box-shadow: 0 8px 25px rgba(0,0,0,0.4); z-index: 9998; display: flex; align-items: center; justify-content: center; transition: 0.3s; }
+    
+    /* GLASS CARD SETTINGS */
+    .glass-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 20px; padding: 25px; margin-bottom: 20px; backdrop-filter: blur(10px); box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
+    .card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 12px; }
+    .card-header h3 { font-size: 16px; font-weight: 800; color: #fff; }
+    .card-header i { color: var(--primary); font-size: 18px; }
+
+    /* SETTING ITEM ROW */
+    .setting-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .setting-row:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+    .setting-info h4 { font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 3px; }
+    .setting-info p { font-size: 11px; color: var(--text-muted); }
+
+    /* COLOR PICKER PALETTE */
+    .theme-options { display: flex; gap: 10px; }
+    .color-dot { width: 28px; height: 28px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: 0.2s; }
+    .color-dot.active { border-color: #fff; transform: scale(1.15); }
+
+    /* TOGGLE SWITCH */
+    .switch { position: relative; display: inline-block; width: 50px; height: 26px; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; cursor: pointer; inset: 0; background-color: rgba(255,255,255,0.1); transition: .3s; border-radius: 34px; border: 1px solid var(--border); }
+    .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
+    input:checked + .slider { background-color: var(--primary); }
+    input:checked + .slider:before { transform: translateX(24px); background-color: #000; }
+
+    .modern-btn { width: 100%; padding: 14px; border-radius: 12px; border: none; background: var(--primary); color: #000; font-weight: 800; font-size: 14px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .modern-btn:active { transform: scale(0.97); }
+  </style>
+</head>
+<body>
+
+  <audio id="bgAudio" loop><source src="lagu.mp3" type="audio/mpeg"></audio>
+
+  <header class="sys-topbar">
+    <div class="sys-title">Alight Pro Dashboard</div>
+    <button onclick="toggleAudio()" style="background:none; border:none; color:var(--primary); font-size:18px; cursor:pointer;"><i class="fa-solid fa-volume-high" id="audioIcon"></i></button>
+  </header>
+
+  <button class="floating-fab" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
+
+  <!-- SIDEBAR UTAMA (Pastikan menu settings ditambahkan di semua file HTML) -->
+  <nav class="sys-sidebar" id="sysSidebar">
+    <a href="home.html" class="nav-item"><i class="fa-solid fa-house"></i> Dashboard</a>
+    <a href="generate.html" class="nav-item"><i class="fa-solid fa-crown"></i> Generate Premium</a>
+    <a href="tools.html" class="nav-item"><i class="fa-solid fa-toolbox"></i> Extractor Tools</a>
+    <a href="dev.html" class="nav-item"><i class="fa-solid fa-code"></i> Developer Matrix</a>
+    <a href="settings.html" class="nav-item active"><i class="fa-solid fa-gear"></i> System Settings</a>
+    <div class="nav-item" onclick="executeLogout()" style="margin-top: 30px; color: #ff3366;"><i class="fa-solid fa-power-off"></i> Keluar Sistem</div>
+  </nav>
+
+  <main class="sys-content">
+    
+    <!-- 1. KUSTOMISASI TEMA & WARNA -->
+    <div class="glass-card">
+      <div class="card-header">
+        <i class="fa-solid fa-palette"></i>
+        <h3>Kustomisasi Tampilan & Tema</h3>
+      </div>
+      
+      <div class="setting-row">
+        <div class="setting-info">
+          <h4>Warna Aksen Utama</h4>
+          <p>Pilih warna neon sistem sesuai selera kamu.</p>
+        </div>
+        <div class="theme-options">
+          <div class="color-dot" style="background: #00ff88;" onclick="setTheme('#00ff88')"></div>
+          <div class="color-dot" style="background: #00d2ff;" onclick="setTheme('#00d2ff')"></div>
+          <div class="color-dot" style="background: #a855f7;" onclick="setTheme('#a855f7')"></div>
+          <div class="color-dot" style="background: #ffb703;" onclick="setTheme('#ffb703')"></div>
+        </div>
+      </div>
+
+      <div class="setting-row">
+        <div class="setting-info">
+          <h4>Efek Suara Latar (BGM)</h4>
+          <p>Putar musik latar otomatis saat bernigasi di sistem.</p>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="audioToggle" onchange="toggleAudioPreference()">
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <!-- 2. PENGATURAN DATA & CACHE -->
+    <div class="glass-card">
+      <div class="card-header">
+        <i class="fa-solid fa-database"></i>
+        <h3>Manajemen Sesi & Cache</h3>
+      </div>
+      
+      <div class="setting-row">
+        <div class="setting-info">
+          <h4>Hapus Sesi & Cache Lokal</h4>
+          <p>Membersihkan memori penyimpanan lokal browser/APK.</p>
+        </div>
+        <button class="modern-btn" style="width: auto; padding: 8px 14px; font-size: 12px; background: rgba(255,255,255,0.1); color: #fff;" onclick="clearSystemCache()">Bersihkan</button>
+      </div>
+
+      <div class="setting-row">
+        <div class="setting-info">
+          <h4>Versi Sistem Aktif</h4>
+          <p>Alight Pro Core Framework v2.1 (Stable)</p>
+        </div>
+        <span style="font-family: 'Fira Code', monospace; font-size: 12px; color: var(--primary);">ONLINE</span>
+      </div>
+    </div>
+
+    <!-- 3. TOMBOL KELUAR / RESET -->
+    <div class="glass-card" style="text-align: center;">
+      <button class="modern-btn" style="background: rgba(255, 51, 102, 0.15); color: #ff3366; border: 1px solid rgba(255, 51, 102, 0.4);" onclick="executeLogout()">
+        <i class="fa-solid fa-power-off"></i> Hentikan Sesi & Keluar
+      </button>
+    </div>
+
+  </main>
+
+  <script>
+    let role = sessionStorage.getItem('alightRole');
+    if (!role) window.location.replace('index.html');
+
+    function toggleSidebar() { document.getElementById('sysSidebar').classList.toggle('active'); }
+    function executeLogout() { sessionStorage.clear(); window.location.href = 'index.html'; }
+
+    // --- FITUR GANTI TEMA WARNA ---
+    function setTheme(colorHex) {
+      document.documentElement.style.setProperty('--primary', colorHex);
+      localStorage.setItem('alightThemeColor', colorHex);
+      
+      // Update warna aktif di titik palet
+      document.querySelectorAll('.color-dot').forEach(dot => {
+        dot.classList.remove('active');
+        if(dot.style.background.includes(rgbToHex(colorHex))) dot.classList.add('active');
+      });
+    }
+
+    // Load tema tersimpan saat halaman dibuka
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedTheme = localStorage.getItem('alightThemeColor');
+      if (savedTheme) {
+        document.documentElement.style.setProperty('--primary', savedTheme);
+      }
+    });
+
+    // Helper konversi warna hex sederhana
+    function rgbToHex(color) { return color; }
+
+    // --- FITUR AUDIO PREFERENCE ---
+    function toggleAudioPreference() {
+      const isChecked = document.getElementById('audioToggle').checked;
+      localStorage.setItem('alightAudioPref', isChecked);
+      if (isChecked) {
+        document.getElementById('bgAudio').play().catch(e => {});
+      } else {
+        document.getElementById('bgAudio').pause();
+      }
+    }
+
+    function toggleAudio() {
+      const audio = document.getElementById('bgAudio');
+      const icon = document.getElementById('audioIcon');
+      if(audio.paused) { 
+        audio.play().catch(e=>alert("Klik layar dulu untuk memutar lagu.")); 
+        icon.className = "fa-solid fa-volume-high"; 
+      } else { 
+        audio.pause(); 
+        icon.className = "fa-solid fa-volume-xmark"; 
+      }
+    }
+
+    function clearSystemCache() {
+      localStorage.clear();
+      alert("Cache sistem berhasil dibersihkan!");
+      location.reload();
+    }
+  </script>
+</body>
+</html>
