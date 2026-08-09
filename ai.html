@@ -185,6 +185,21 @@
     let role = sessionStorage.getItem('alightRole');
     if (!role) window.location.replace('index.html');
 
+        // Simpan & Load History Chat AI di localStorage
+    function saveChatHistory() {
+      const container = document.getElementById('chatContainer');
+      localStorage.setItem('alightAiChatHistory', container.innerHTML);
+    }
+
+    function loadChatHistory() {
+      const saved = localStorage.getItem('alightAiChatHistory');
+      if (saved) {
+        document.getElementById('chatContainer').innerHTML = saved;
+      }
+    }
+    window.addEventListener('DOMContentLoaded', loadChatHistory);
+    
+
     function toggleSidebar() { document.getElementById('sysSidebar').classList.toggle('active'); }
     function executeLogout() { sessionStorage.clear(); window.location.href = 'index.html'; }
 
