@@ -9,7 +9,15 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Fira+Code:wght@500&display=swap" rel="stylesheet">
 
   <style>
-    :root { --bg-color: #020617; --card-bg: rgba(15, 23, 42, 0.75); --primary: #00ff88; --text-main: #f8fafc; --text-muted: #94a3b8; --border: rgba(255, 255, 255, 0.1); --sidebar-width: 270px; }
+    :root { 
+      --bg-color: #020617; 
+      --card-bg: rgba(15, 23, 42, 0.75); 
+      --primary: #00ff88; 
+      --text-main: #f8fafc; 
+      --text-muted: #94a3b8; 
+      --border: rgba(255, 255, 255, 0.1); 
+      --sidebar-width: 270px; 
+    }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
     
     body { 
@@ -30,7 +38,7 @@
     .sys-sidebar { position: fixed; top: 0; left: -100%; width: var(--sidebar-width); height: 100vh; background: rgba(15, 23, 42, 0.98); backdrop-filter: blur(20px); border-right: 1px solid var(--border); z-index: 9999; padding-top: 85px; transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 20px 0 50px rgba(0,0,0,0.8); }
     .sys-sidebar.active { left: 0; }
     
-    .nav-item { padding: 16px 24px; display: flex; align-items: center; gap: 15px; color: var(--text-muted); font-size: 14px; font-weight: 600; cursor: pointer; text-decoration: none; transition: 0.3s; border-left: 4px solid transparent; }
+    .nav-item { padding: 15px 24px; display: flex; align-items: center; gap: 15px; color: var(--text-muted); font-size: 14px; font-weight: 600; cursor: pointer; text-decoration: none; transition: 0.3s; border-left: 4px solid transparent; }
     .nav-item:hover, .nav-item.active { background: rgba(0, 255, 136, 0.08); border-left-color: var(--primary); color: var(--primary); }
     
     .sys-content { padding: 95px 20px 40px; max-width: 700px; margin: 0 auto; }
@@ -108,12 +116,13 @@
 
   <nav class="sys-sidebar" id="sysSidebar">
     <a href="home.html" class="nav-item active"><i class="fa-solid fa-house"></i> Dashboard</a>
-    <a href="ai.html" class="nav-item"><i class="fa-solid fa-brain"></i> AI Command Matrix</a>
     <a href="generate.html" class="nav-item"><i class="fa-solid fa-crown"></i> Generate Premium</a>
     <a href="tools.html" class="nav-item"><i class="fa-solid fa-toolbox"></i> Extractor Tools</a>
     <a href="dev.html" class="nav-item"><i class="fa-solid fa-code"></i> Developer Matrix</a>
+    <a href="ai.html" class="nav-item"><i class="fa-solid fa-brain"></i> AI Command Matrix</a>
+    <a href="notes.html" class="nav-item"><i class="fa-solid fa-note-sticky"></i> Dev Scratchpad</a>
     <a href="settings.html" class="nav-item"><i class="fa-solid fa-gear"></i> System Settings</a>
-    <div class="nav-item" onclick="executeLogout()" style="margin-top: 40px; color: #ff3366;"><i class="fa-solid fa-power-off"></i> Keluar Sistem</div>
+    <div class="nav-item" onclick="executeLogout()" style="margin-top: 20px; color: #ff3366;"><i class="fa-solid fa-power-off"></i> Keluar Sistem</div>
   </nav>
 
   <main class="sys-content">
@@ -121,10 +130,10 @@
     <!-- 1. WELCOME BANNER -->
     <div class="glass-card" style="border-left: 4px solid var(--primary);">
       <h2 style="font-size: 20px; font-weight: 800; margin-bottom: 5px;">Welcome Back, <span id="userRoleDisplay" style="color: var(--primary);">USER</span>!</h2>
-      <p style="font-size: 12px; color: var(--text-muted); line-height: 1.6;">Otorisasi berhasil. Anda terhubung dengan node utama Alight Pro Server V4.0.</p>
+      <p style="font-size: 12px; color: var(--text-muted); line-height: 1.6;">Otorisasi berhasil. Anda terhubung dengan node utama Alight Pro Server V2.1.</p>
     </div>
 
-    <!-- 2. SYSTEM STATS GRID (REAL-TIME AKTIF) -->
+    <!-- 2. SYSTEM STATS GRID (TERHUBUNG KE BACKEND VERCEL) -->
     <div class="stats-grid">
       <div class="stat-box">
         <span class="title">System Uptime</span>
@@ -164,19 +173,19 @@
       </button>
     </div>
 
-    <!-- 4. RESOURCE MONITOR -->
+    <!-- 4. RESOURCE MONITOR (TERHUBUNG KE BACKEND) -->
     <div class="glass-card">
       <div class="card-header">
         <i class="fa-solid fa-server"></i>
         <h3>Server Resource Monitor</h3>
       </div>
       <div class="resource-item">
-        <div class="resource-header"><span>CPU Load</span> <span style="color: #00ff88;">34%</span></div>
-        <div class="progress-bg"><div class="progress-bar" style="width: 34%;"></div></div>
+        <div class="resource-header"><span>CPU Load (Vercel Edge)</span> <span id="cpuText" style="color: #00ff88;">34%</span></div>
+        <div class="progress-bg"><div id="cpuBar" class="progress-bar" style="width: 34%;"></div></div>
       </div>
       <div class="resource-item">
-        <div class="resource-header"><span>RAM Usage</span> <span style="color: #ffb703;">78%</span></div>
-        <div class="progress-bg"><div class="progress-bar" style="width: 78%; background: #ffb703;"></div></div>
+        <div class="resource-header"><span>RAM Memory Usage</span> <span id="ramText" style="color: #ffb703;">78%</span></div>
+        <div class="progress-bg"><div id="ramBar" class="progress-bar" style="width: 78%; background: #ffb703; box-shadow: 0 0 10px #ffb703;"></div></div>
       </div>
     </div>
 
@@ -198,7 +207,7 @@
       </div>
     </div>
 
-    <!-- 6. PATCH NOTES (VERSI 2.1 - MUDAH DIEDIT MANUAL) -->
+    <!-- 6. PATCH NOTES (VERSI 2.1) -->
     <div class="glass-card">
       <div class="card-header">
         <i class="fa-solid fa-file-lines"></i>
@@ -215,16 +224,16 @@
 
         <h4>✨ Fitur & Pembaruan</h4>
         <ul>
-          <li><strong>Real-time Dashboard Stats:</strong> Penambahan indikator uptime, latensi server, dan live counter aktivitas.</li>
-          <li><strong>UI Glassmorphism:</strong> Pembaruan antarmuka modern yang responsif di APK.</li>
-          <li><strong>Universal Extractor:</strong> Integrasi engine unduhan TikTok & YouTube.</li>
-          <li><strong>Tic-Tac-Toe AI:</strong> Penambahan tingkat kesulitan AI di menu Developer.</li>
+          <li><strong>Real-time Vercel Stats:</strong> Statistik uptime, CPU, dan RAM terhubung langsung ke backend serverless.</li>
+          <li><strong>AI Multi-Model Gateway:</strong> Integrasi ChatGPT, Gemini, dan Groq AI di menu AI Matrix.</li>
+          <li><strong>Dev Scratchpad:</strong> Fitur penyimpanan catatan & snippet kode lokal.</li>
+          <li><strong>System Settings:</strong> Kustomisasi tema warna aksen & preferensi BGM.</li>
         </ul>
 
         <h4>🛠️ Perbaikan Bug</h4>
         <ul>
           <li>Optimalisasi kecepatan respons serverless Vercel.</li>
-          <li>Perbaikan kestabilan tombol unduh di dalam build APK.</li>
+          <li>Perbaikan kestabilan navigasi sidebar di berbagai ukuran layar.</li>
         </ul>
       </div>
     </div>
@@ -259,19 +268,34 @@
       }
     }
 
-    // --- SKRIP STATISTIK REAL-TIME & LIVE ---
-    
-    // 1. Uptime Timer
-    let secondsActive = 0;
-    setInterval(() => {
-      secondsActive++;
-      let hrs = Math.floor(secondsActive / 3600).toString().padStart(2, '0');
-      let mins = Math.floor((secondsActive % 3600) / 60).toString().padStart(2, '0');
-      let secs = (secondsActive % 60).toString().padStart(2, '0');
-      document.getElementById('uptimeDisplay').innerText = `${hrs}:${mins}:${secs}`;
-    }, 1000);
+    // --- FETCH STATISTIK NYATA DARI BACKEND VERCEL (/api/stats.js) ---
+    async function fetchServerStats() {
+      try {
+        const res = await fetch('/api/stats');
+        const data = await res.json();
+        
+        if (data.status) {
+          let sec = data.uptime;
+          let hrs = Math.floor(sec / 3600).toString().padStart(2, '0');
+          let mins = Math.floor((sec % 3600) / 60).toString().padStart(2, '0');
+          let secs = (sec % 60).toString().padStart(2, '0');
+          document.getElementById('uptimeDisplay').innerText = `${hrs}:${mins}:${secs}`;
 
-    // 2. Real Ping Latency Tester
+          document.getElementById('execDisplay').innerText = data.totalExecutions.toLocaleString();
+          document.getElementById('usersDisplay').innerText = data.activeUsers;
+
+          document.getElementById('cpuText').innerText = data.cpu + "%";
+          document.getElementById('cpuBar').style.width = data.cpu + "%";
+
+          document.getElementById('ramText').innerText = data.ram + "%";
+          document.getElementById('ramBar').style.width = data.ram + "%";
+        }
+      } catch (e) {
+        console.log("Mode fallback lokal aktif.");
+      }
+    }
+
+    // --- REAL PING LATENCY TESTER ---
     async function checkRealPing() {
       const start = performance.now();
       try {
@@ -284,22 +308,12 @@
         document.getElementById('pingDisplay').innerText = "38 ms";
       }
     }
+
+    fetchServerStats();
     checkRealPing();
-    setInterval(checkRealPing, 10000);
-
-    // 3. Live Counter Simulasi Sibuk
-    setInterval(() => {
-      let currentExec = parseInt(document.getElementById('execDisplay').innerText.replace(/,/g, ''));
-      if (Math.random() > 0.4) {
-        currentExec += Math.floor(Math.random() * 3) + 1;
-        document.getElementById('execDisplay').innerText = currentExec.toLocaleString();
-      }
-
-      let currentUsers = parseInt(document.getElementById('usersDisplay').innerText);
-      let fluctuation = Math.floor(Math.random() * 5) - 2;
-      let newUsers = Math.max(95, currentUsers + fluctuation);
-      document.getElementById('usersDisplay').innerText = newUsers;
-    }, 4000);
+    
+    setInterval(fetchServerStats, 4000); 
+    setInterval(checkRealPing, 10000);    
   </script>
 </body>
 </html>
