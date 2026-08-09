@@ -33,10 +33,22 @@
       background-attachment: fixed; 
     }
 
-    /* TOPBAR & SIDEBAR */
     .sys-topbar { position: fixed; top: 0; left: 0; width: 100%; height: 70px; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(15px); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; z-index: 1000; }
-    .sys-title { font-size: 16px; font-weight: 800; color: var(--primary); letter-spacing: 1.5px; text-transform: uppercase; }
+    .sys-title { font-size: 15px; font-weight: 800; color: var(--primary); letter-spacing: 1px; text-transform: uppercase; }
     
+    /* DROPDOWN PEMILIH MODEL AI DI TOPBAR */
+    .ai-model-select {
+      background: rgba(0, 0, 0, 0.6);
+      border: 1px solid var(--border);
+      color: var(--primary);
+      padding: 6px 12px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 700;
+      outline: none;
+      cursor: pointer;
+    }
+
     .sys-sidebar { position: fixed; top: 0; left: -100%; width: var(--sidebar-width); height: 100vh; background: rgba(15, 23, 42, 0.98); backdrop-filter: blur(20px); border-right: 1px solid var(--border); z-index: 9999; padding-top: 85px; transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 20px 0 50px rgba(0,0,0,0.8); }
     .sys-sidebar.active { left: 0; }
     
@@ -45,7 +57,6 @@
     
     .floating-fab { position: fixed; bottom: 85px; left: 20px; width: 55px; height: 55px; background: var(--primary); color: #000; border-radius: 50%; border: none; font-size: 20px; cursor: pointer; box-shadow: 0 8px 25px rgba(0,0,0,0.4); z-index: 9998; display: flex; align-items: center; justify-content: center; }
 
-    /* CHAT CONTAINER AREA */
     .chat-container { 
       flex: 1; 
       margin-top: 70px; 
@@ -89,7 +100,6 @@
       box-shadow: 0 4px 15px rgba(0,255,136,0.2);
     }
 
-    /* INPUT CHAT BAWAH */
     .chat-input-area {
       position: fixed;
       bottom: 0;
@@ -138,7 +148,13 @@
   <audio id="bgAudio" loop><source src="lagu.mp3" type="audio/mpeg"></audio>
 
   <header class="sys-topbar">
-    <div class="sys-title">AI Command Matrix</div>
+    <div class="sys-title">AI Matrix</div>
+    <!-- Opsi Pemilihan Model AI -->
+    <select id="aiModelSelect" class="ai-model-select">
+      <option value="chatgpt">ChatGPT (OpenAI)</option>
+      <option value="gemini">Google Gemini</option>
+      <option value="deepseek">DeepSeek / Groq</option>
+    </select>
     <button onclick="toggleAudio()" style="background:none; border:none; color:var(--primary); font-size:18px; cursor:pointer;"><i class="fa-solid fa-volume-high" id="audioIcon"></i></button>
   </header>
 
@@ -154,16 +170,14 @@
     <div class="nav-item" onclick="executeLogout()" style="margin-top: 30px; color: #ff3366;"><i class="fa-solid fa-power-off"></i> Keluar Sistem</div>
   </nav>
 
-  <!-- AREA PERCAKAPAN CHAT -->
   <div class="chat-container" id="chatContainer">
     <div class="chat-bubble ai">
-      <strong>[SYSTEM AI v2.1]:</strong> Halo! Saya adalah asisten neural Alight Pro. Ada yang bisa saya bantu terkait sistem, ekstrak media, atau skrip hari ini?
+      <strong>[SYSTEM AI]:</strong> Pilih model AI di bagian atas (ChatGPT, Gemini, atau DeepSeek), lalu tanyakan apa saja ke saya!
     </div>
   </div>
 
-  <!-- INPUT AREA -->
   <div class="chat-input-area">
-    <input type="text" id="chatInput" class="chat-input" placeholder="Ketik perintah atau tanyakan sesuatu..." autocomplete="off">
+    <input type="text" id="chatInput" class="chat-input" placeholder="Ketik pesan..." autocomplete="off">
     <button class="send-btn" onclick="sendMessage()"><i class="fa-solid fa-paper-plane"></i></button>
   </div>
 
@@ -181,15 +195,15 @@
       else { audio.pause(); icon.className = "fa-solid fa-volume-xmark"; }
     }
 
-    // --- LOGIKA CHAT AI INTERAKTIF ---
-    function sendMessage() {
+    async function sendMessage() {
       const input = document.getElementById('chatInput');
       const text = input.value.trim();
+      const selectedModel = document.getElementById('aiModelSelect').value;
       if (!text) return;
 
       const container = document.getElementById('chatContainer');
 
-      // 1. Tampilkan pesan User
+      // Tampilkan pesan User
       const userBubble = document.createElement('div');
       userBubble.className = 'chat-bubble user';
       userBubble.innerText = text;
@@ -198,28 +212,32 @@
       input.value = '';
       container.scrollTop = container.scrollHeight;
 
-      // 2. Simulasi AI Berpikir & Menjawab
-      setTimeout(() => {
-        const aiBubble = document.createElement('div');
-        aiBubble.className = 'chat-bubble ai';
-        aiBubble.innerHTML = `<strong>[SYSTEM AI]:</strong> Sedang memproses kueri "${text}"... Sistem berjalan normal pada node Vercel Core.`;
-        
-        // Respon pintar berdasarkan kata kunci
-        const lower = text.toLowerCase();
-        if (lower.includes('halo') || lower.includes('hai')) {
-          aiBubble.innerHTML = `<strong>[SYSTEM AI]:</strong> Halo juga! Ada yang bisa dibantu seputar fitur Alight Pro?`;
-        } else if (lower.includes('pembuat') || lower.includes('juiko')) {
-          aiBubble.innerHTML = `<strong>[SYSTEM AI]:</strong> Sistem ini dikembangkan sepenuhnya oleh Juiko Coders dengan arsitektur serverless Vercel.`;
-        } else if (lower.includes('download') || lower.includes('tools')) {
-          aiBubble.innerHTML = `<strong>[SYSTEM AI]:</strong> Menu Extractor Tools digunakan untuk mengunduh media TikTok dan YouTube. Pastikan link yang dimasukkan valid ya!`;
-        }
+      // Bubble Loading AI
+      const aiBubble = document.createElement('div');
+      aiBubble.className = 'chat-bubble ai';
+      aiBubble.innerHTML = `<strong>[${selectedModel.toUpperCase()}]:</strong> <i class="fa-solid fa-spinner fa-spin"></i> Menghubungkan ke API...`;
+      container.appendChild(aiBubble);
+      container.scrollTop = container.scrollHeight;
 
-        container.appendChild(aiBubble);
-        container.scrollTop = container.scrollHeight;
-      }, 800);
+      try {
+        const response = await fetch('/api/ai', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: text, model: selectedModel })
+        });
+
+        const data = await response.json();
+        if (data.status && data.reply) {
+          aiBubble.innerHTML = `<strong>[${selectedModel.toUpperCase()}]</strong><br>${data.reply}`;
+        } else {
+          aiBubble.innerHTML = `<strong>[ERROR]:</strong> ${data.error || "Gagal mendapatkan respons."}<br><small style="color:#ffb703;">${data.fallback || ""}</small>`;
+        }
+      } catch (err) {
+        aiBubble.innerHTML = `<strong>[SYSTEM]:</strong> Gagal menghubungi server backend API.`;
+      }
+      container.scrollTop = container.scrollHeight;
     }
 
-    // Tekan Enter untuk Kirim
     document.getElementById("chatInput").addEventListener("keypress", function(event) {
       if (event.key === "Enter") {
         event.preventDefault();
