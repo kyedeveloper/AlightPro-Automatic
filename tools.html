@@ -22,35 +22,30 @@
     .floating-fab { position: fixed; bottom: 25px; left: 20px; width: 55px; height: 55px; background: var(--primary); color: #000; border-radius: 50%; border: none; font-size: 20px; cursor: pointer; z-index: 9998; display: flex; align-items: center; justify-content: center; }
     
     .glass-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 20px; padding: 25px; margin-bottom: 20px; backdrop-filter: blur(10px); }
-    .glass-card h3 { font-size: 16px; margin-bottom: 18px; display: flex; align-items: center; gap: 10px; font-weight: 800; }
-    .glass-card h3 i { color: var(--primary); }
     
     .modern-input { width: 100%; padding: 16px; margin-bottom: 15px; border-radius: 14px; border: 1px solid var(--border); background: rgba(0,0,0,0.5); color: #fff; font-size: 15px; outline: none; }
     .modern-btn { width: 100%; padding: 16px; border-radius: 14px; border: none; background: var(--primary); color: #000; font-weight: 800; font-size: 15px; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; transition: 0.2s; text-decoration: none; }
     .modern-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
-    /* MODAL HASIL EKSTRAK */
-    #resultModal { position: fixed; inset: 0; background: rgba(2, 6, 23, 0.85); backdrop-filter: blur(12px); display: none; justify-content: center; align-items: center; z-index: 100000; padding: 20px; }
-    .result-box { background: #0f172a; border: 1px solid rgba(0, 255, 136, 0.4); border-radius: 22px; padding: 25px; width: 100%; max-width: 400px; text-align: center; box-shadow: 0 25px 50px rgba(0,0,0,0.9); animation: zoomIn 0.3s ease; }
+    /* MODAL POPUP */
+    .custom-modal { position: fixed; inset: 0; background: rgba(2, 6, 23, 0.85); backdrop-filter: blur(12px); display: none; justify-content: center; align-items: center; z-index: 100000; padding: 20px; }
+    .modal-box { background: #0f172a; border-radius: 22px; padding: 25px; width: 100%; max-width: 360px; text-align: center; animation: zoomIn 0.3s ease; }
     @keyframes zoomIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
   </style>
 </head>
 <body>
   <audio id="bgAudio" loop><source src="lagu.mp3" type="audio/mpeg"></audio>
 
-  <!-- MODAL HASIL DOWNLOAD -->
-  <div id="resultModal">
-    <div class="result-box">
-      <div style="width: 50px; height: 50px; margin: 0 auto 15px; background: rgba(0,255,136,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid var(--primary);">
-        <i class="fa-solid fa-circle-check" style="font-size: 24px; color: var(--primary);"></i>
+  <!-- MODAL MAINTENANCE (BARU) -->
+  <div id="maintenanceModal" class="custom-modal">
+    <div class="modal-box" style="border: 1px solid #ffb703; box-shadow: 0 25px 50px rgba(0,0,0,0.9), 0 0 25px rgba(255, 183, 3, 0.15);">
+      <div style="width: 65px; height: 65px; margin: 0 auto 15px; background: rgba(255, 183, 3, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid #ffb703;">
+        <i class="fa-solid fa-person-digging" style="font-size: 30px; color: #ffb703;"></i>
       </div>
-      <h3 style="color: #fff; font-size: 18px; font-weight: 800; margin-bottom: 8px;">Media Berhasil Diekstrak!</h3>
-      <p style="color: var(--text-muted); font-size: 12px; margin-bottom: 20px;">Klik tombol di bawah untuk memicu sistem unduhan APK ke folder Downloads HP.</p>
+      <h3 style="color: #ffb703; font-size: 18px; font-weight: 800; margin-bottom: 8px;">Server Sedang Maintenance!</h3>
+      <p style="color: var(--text-muted); font-size: 13px; line-height: 1.6; margin-bottom: 22px;">Fitur Universal Downloader saat ini sedang dalam perbaikan dan pembaruan sistem. Silakan coba lagi nanti.</p>
       
-      <button id="downloadActionBtn" class="modern-btn" style="margin-bottom: 12px;" onclick="triggerDownload()">
-        <i class="fa-solid fa-download"></i> UNDUH KE PERANGKAT
-      </button>
-      <button class="modern-btn" style="background: rgba(255,255,255,0.08); color: #fff; border: 1px solid var(--border); box-shadow: none;" onclick="closeResultModal()">Tutup Jendela</button>
+      <button class="modern-btn" style="background: #ffb703; color: #000; box-shadow: 0 5px 20px rgba(255, 183, 3, 0.3);" onclick="document.getElementById('maintenanceModal').style.display='none'">Kembali</button>
     </div>
   </div>
 
@@ -70,15 +65,24 @@
   </nav>
 
   <main class="sys-content">
-    <div class="glass-card">
-      <h3><i class="fa-solid fa-cloud-arrow-down"></i> Universal Downloader Core</h3>
-      <select id="dlPlatform" class="modern-input" style="appearance: none;">
+    <div class="glass-card" style="text-align: center;">
+      <!-- LOGO TENGAH (BARU) -->
+      <div style="width: 85px; height: 85px; margin: 0 auto 20px; background: rgba(0,255,136,0.05); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px dashed var(--primary); box-shadow: 0 0 25px rgba(0,255,136,0.15);">
+        <i class="fa-solid fa-cloud-arrow-down" style="font-size: 38px; color: var(--primary);"></i>
+      </div>
+      
+      <h3 style="justify-content: center; margin-bottom: 25px; font-size: 18px; font-weight: 800;">Universal Downloader Core</h3>
+      
+      <select id="dlPlatform" class="modern-input" style="appearance: none; text-align: center;">
         <option value="tiktok_video">TikTok Engine (MP4)</option>
         <option value="tiktok_audio">TikTok Engine (MP3)</option>
         <option value="youtube_video">YouTube Engine (MP4)</option>
         <option value="youtube_audio">YouTube Engine (MP3)</option>
       </select>
-      <input type="text" id="dlUrl" class="modern-input" placeholder="Paste URL Source di sini...">
+      
+      <input type="text" id="dlUrl" class="modern-input" placeholder="Paste URL Source di sini..." style="text-align: center;">
+      
+      <!-- TOMBOL UNDUH YG MEMICU MAINTENANCE -->
       <button id="dlBtn" class="modern-btn" onclick="apiDownloadMedia()"><i class="fa-solid fa-download"></i> Eksekusi Tautan Media</button>
     </div>
   </main>
@@ -91,8 +95,6 @@
       window.location.replace('home.html');
     }
 
-    let globalDownloadUrl = "";
-
     function toggleSidebar() { document.getElementById('sysSidebar').classList.toggle('active'); }
     function executeLogout() { sessionStorage.clear(); window.location.href = 'index.html'; }
     function toggleAudio() {
@@ -101,103 +103,35 @@
       else { audio.pause(); document.getElementById('audioIcon').className="fa-solid fa-volume-xmark"; }
     }
 
-    function closeResultModal() {
-      document.getElementById('resultModal').style.display = 'none';
-    }
-
-        function triggerDownload() {
-      if (!globalDownloadUrl) return;
-
-      const btn = document.getElementById('downloadActionBtn');
-      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Memulai Unduhan...`;
-
-      try {
-        // Metode 1: Paksa buat link dengan atribut download dan target _blank
-        const a = document.createElement('a');
-        a.href = globalDownloadUrl;
-        a.download = 'AlightPro_' + Date.now() + '.mp4';
-        a.target = '_blank';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-
-        // Metode 2: Cadangan iframe tersembunyi khusus APK builder agar memaksa proses download di background
-        const iframe = document.createElement('iframe');
-        iframe.style.display = 'none';
-        iframe.src = globalDownloadUrl;
-        document.body.appendChild(iframe);
-        setTimeout(() => { document.body.removeChild(iframe); }, 5000);
-
-        btn.innerHTML = `<i class="fa-solid fa-check"></i> Unduhan Dipicu!`;
-        setTimeout(() => {
-          closeResultModal();
-          btn.innerHTML = `<i class="fa-solid fa-download"></i> UNDUH KE PERANGKAT`;
-        }, 1500);
-
-      } catch (e) {
-        window.open(globalDownloadUrl, '_blank');
-        closeResultModal();
-      }
-    }
-
-
-      const btn = document.getElementById('downloadActionBtn');
-      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Memulai Unduhan...`;
-
-      try {
-        // Buat elemen <a> dinamis dengan atribut 'download' dan 'target="_blank"'
-        // Ini akan memicu Android WebView untuk menangkap URL dan melemparkannya ke DownloadManager bawaan HP
-        const a = document.createElement('a');
-        a.href = globalDownloadUrl;
-        a.setAttribute('download', 'AlightPro_Media_' + Date.now() + '.mp4');
-        a.setAttribute('target', '_blank');
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-
-        btn.innerHTML = `<i class="fa-solid fa-check"></i> Proses Unduh Dimulai!`;
-        setTimeout(() => {
-          closeResultModal();
-          btn.innerHTML = `<i class="fa-solid fa-download"></i> UNDUH KE PERANGKAT`;
-        }, 1500);
-      } catch (e) {
-        // Fallback mutlak jika WebView menolak
-        window.location.href = globalDownloadUrl;
-      }
-    }
-
     async function apiDownloadMedia() {
-      const plat = document.getElementById('dlPlatform').value;
       const url = document.getElementById('dlUrl').value.trim();
-      const btn = document.getElementById('dlBtn');
-
       if (!url) return alert("Masukkan link target terlebih dahulu!");
 
+      // FITUR SENGAJA DI-BYPASS KE MODE MAINTENANCE
+      document.getElementById('maintenanceModal').style.display = 'flex';
+      
+      /* (KODE ASLI FETCH API DOWNLOAD DISIMPAN & DINONAKTIFKAN SEMENTARA)
+      const plat = document.getElementById('dlPlatform').value;
+      const btn = document.getElementById('dlBtn');
       btn.disabled = true;
       btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Sedang Mengekstrak...`;
-
       try {
         const res = await fetch('/api/download', { 
           method: 'POST', 
           headers: { 'Content-Type': 'application/json' }, 
           body: JSON.stringify({ platform: plat, url }) 
         });
-        
         const data = await res.json();
-        
-        if (!res.ok || !data.status) {
-          throw new Error(data.error || "Gagal mengambil tautan unduhan.");
-        }
-
+        if (!res.ok || !data.status) throw new Error(data.error || "Gagal mengambil tautan unduhan.");
         globalDownloadUrl = data.downloadUrl;
         document.getElementById('resultModal').style.display = 'flex';
-
       } catch (e) {
         alert("Gagal: " + e.message);
       } finally {
         btn.disabled = false;
         btn.innerHTML = `<i class="fa-solid fa-download"></i> Eksekusi Tautan Media`;
       }
+      */
     }
   </script>
 </body>
