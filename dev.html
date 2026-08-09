@@ -8,7 +8,6 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Fira+Code&display=swap" rel="stylesheet">
   <style>
-    /* CSS persis seperti yg lain ditambah stylng game */
     :root { --bg-color: #020617; --card-bg: rgba(15, 23, 42, 0.75); --primary: #00ff88; --text-main: #f8fafc; --text-muted: #94a3b8; --border: rgba(255, 255, 255, 0.1); --sidebar-width: 270px; }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
     body { background-color: var(--bg-color); color: var(--text-main); overflow-x: hidden; min-height: 100vh; background-image: radial-gradient(circle at 10% 20%, rgba(0, 255, 136, 0.05) 0%, transparent 40%), radial-gradient(circle at 90% 80%, rgba(99, 102, 241, 0.05) 0%, transparent 40%); background-attachment: fixed; }
@@ -22,12 +21,13 @@
     .floating-fab { position: fixed; bottom: 25px; left: 20px; width: 55px; height: 55px; background: var(--primary); color: #000; border-radius: 50%; border: none; font-size: 20px; cursor: pointer; z-index: 9998; display: flex; align-items: center; justify-content: center; }
     .glass-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 20px; padding: 25px; margin-bottom: 20px; backdrop-filter: blur(10px); }
     .modern-btn { width: 100%; padding: 16px; border-radius: 14px; border: none; background: var(--primary); color: #000; font-weight: 800; font-size: 15px; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; text-decoration: none;}
+    .modern-input { width: 100%; padding: 14px; margin-bottom: 15px; border-radius: 14px; border: 1px solid var(--border); background: rgba(0,0,0,0.5); color: #fff; font-size: 14px; outline: none; appearance: none; text-align: center;}
     
     /* Tic Tac Toe Stylng */
-    .tictactoe-board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; max-width: 200px; margin: 15px auto; }
-    .tictactoe-cell { aspect-ratio: 1; background: rgba(0, 0, 0, 0.5); border: 1px solid var(--border); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 30px; font-weight: 800; color: var(--primary); cursor: pointer; transition: 0.3s; }
+    .tictactoe-board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; max-width: 220px; margin: 15px auto; }
+    .tictactoe-cell { aspect-ratio: 1; background: rgba(0, 0, 0, 0.5); border: 1px solid var(--border); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 35px; font-weight: 800; color: var(--primary); cursor: pointer; transition: 0.3s; }
     .tictactoe-cell:hover { background: rgba(0, 255, 136, 0.1); border-color: var(--primary); }
-    .tictactoe-status { font-size: 14px; color: var(--primary); font-weight: 600; margin-bottom: 5px; }
+    .tictactoe-status { font-size: 14px; color: var(--primary); font-weight: 600; margin-bottom: 10px; }
   </style>
 </head>
 <body>
@@ -62,8 +62,15 @@
 
     <!-- MINIGAME -->
     <div class="glass-card" style="text-align: center;">
-      <h3 style="justify-content:center; margin-bottom:10px;"><i class="fa-solid fa-gamepad"></i> Mini Game: Tic-Tac-Toe</h3>
-      <p style="font-size:12px; color:var(--text-muted); margin-bottom:15px;">Gabut? Main bentar.</p>
+      <h3 style="justify-content:center; margin-bottom:10px;"><i class="fa-solid fa-robot"></i> Tic-Tac-Toe AI Engine</h3>
+      
+      <!-- Pilihan Mode AI -->
+      <select id="tttMode" class="modern-input" onchange="tttReset()">
+        <option value="2p">Main 2 Pemain (Lokal)</option>
+        <option value="easy">Lawan AI (Mudah)</option>
+        <option value="medium">Lawan AI (Normal)</option>
+        <option value="hard">Lawan AI (Sulit)</option>
+      </select>
       
       <div class="tictactoe-status" id="tttStatus">Mulai Permainan - Giliran: X</div>
       
@@ -94,37 +101,133 @@
       else { audio.pause(); document.getElementById('audioIcon').className="fa-solid fa-volume-xmark"; }
     }
 
+    // --- LOGIKA GAME TIC-TAC-TOE + AI ---
     let tttBoard = ["", "", "", "", "", "", "", "", ""];
     let tttPlayer = "X";
     let tttActive = true;
+    const wins = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
 
-    function tttClick(index) {
+    function tttClick(index, isAI = false) {
+      const mode = document.getElementById('tttMode').value;
+      
+      // Cegah klik manual kalau lagi giliran AI
+      if (mode !== '2p' && tttPlayer === 'O' && !isAI) return;
+      
       if (!tttActive || tttBoard[index] !== "") return;
+      
       tttBoard[index] = tttPlayer;
       const cells = document.querySelectorAll('.tictactoe-cell');
       cells[index].innerText = tttPlayer;
       cells[index].style.color = tttPlayer === "X" ? "#00ff88" : "#ff3366";
       
-      if (tttCheckWin()) {
+      if (checkWinFor(tttPlayer)) {
         document.getElementById('tttStatus').innerHTML = `Game Over! Player <strong style="color: #fff;">${tttPlayer}</strong> Menang!`;
         tttActive = false; return;
       }
+      
       if (!tttBoard.includes("")) {
         document.getElementById('tttStatus').innerText = "Game Over! Hasilnya Seri!";
         tttActive = false; return;
       }
+      
       tttPlayer = tttPlayer === "X" ? "O" : "X";
       document.getElementById('tttStatus').innerText = `Giliran: ${tttPlayer}`;
+
+      // Picu AI jika mode bukan 2p dan sekarang giliran O
+      if (mode !== '2p' && tttPlayer === 'O' && tttActive) {
+        document.getElementById('tttStatus').innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> AI Sedang Berpikir...`;
+        setTimeout(() => makeAIMove(mode), 600); // Jeda biar AI kerasa "mikir"
+      }
     }
-    function tttCheckWin() {
-      const wins = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
-      return wins.some(c => c.every(i => tttBoard[i] === tttPlayer));
+
+    function checkWinFor(player) {
+      return wins.some(c => c.every(i => tttBoard[i] === player));
     }
+
     function tttReset() {
       tttBoard = ["", "", "", "", "", "", "", "", ""];
-      tttPlayer = "X"; tttActive = true;
+      tttPlayer = "X"; 
+      tttActive = true;
       document.getElementById('tttStatus').innerText = `Mulai Permainan - Giliran: X`;
       document.querySelectorAll('.tictactoe-cell').forEach(c => c.innerText = "");
+    }
+
+    // --- KECERDASAN BUATAN (AI) ---
+    function makeAIMove(mode) {
+      if (!tttActive) return;
+
+      let available = [];
+      for (let i = 0; i < 9; i++) { if (tttBoard[i] === "") available.push(i); }
+      if (available.length === 0) return;
+
+      let move;
+
+      if (mode === 'easy') {
+        // MUDAH: Pilih kotak secara acak
+        move = available[Math.floor(Math.random() * available.length)];
+      } 
+      else if (mode === 'hard') {
+        // SULIT: Gunakan Algoritma Minimax (Mustahil dikalahkan)
+        move = getBestMove();
+      } 
+      else if (mode === 'medium') {
+        // NORMAL: 50% pakai logika jago, 50% ngawur
+        if (Math.random() > 0.5) {
+          move = getBestMove();
+        } else {
+          move = available[Math.floor(Math.random() * available.length)];
+        }
+      }
+
+      tttClick(move, true);
+    }
+
+    // --- ALGORITMA MINIMAX UNTUK AI SULIT ---
+    function getBestMove() {
+      let bestScore = -Infinity;
+      let move;
+      for (let i = 0; i < 9; i++) {
+        if (tttBoard[i] === "") {
+          tttBoard[i] = "O";
+          let score = minimax(tttBoard, 0, false);
+          tttBoard[i] = "";
+          if (score > bestScore) {
+            bestScore = score;
+            move = i;
+          }
+        }
+      }
+      return move;
+    }
+
+    function minimax(board, depth, isMaximizing) {
+      if (checkWinFor("O")) return 10 - depth;
+      if (checkWinFor("X")) return depth - 10;
+      if (!board.includes("")) return 0;
+
+      if (isMaximizing) {
+        let bestScore = -Infinity;
+        for (let i = 0; i < 9; i++) {
+          if (board[i] === "") {
+            board[i] = "O";
+            let score = minimax(board, depth + 1, false);
+            board[i] = "";
+            bestScore = Math.max(score, bestScore);
+          }
+        }
+        return bestScore;
+      } else {
+        let bestScore = Infinity;
+        for (let i = 0; i < 9; i++) {
+          if (board[i] === "") {
+            board[i] = "X";
+            let score = minimax(board, depth + 1, true);
+            board[i] = "";
+            bestScore = Math.min(score, bestScore);
+          }
+        }
+        return bestScore;
+      }
     }
   </script>
 </body>
