@@ -2,50 +2,44 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Alight Pro Hub | Tools</title>
   
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Fira+Code&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Fira+Code:wght@500&display=swap" rel="stylesheet">
   <style>
     :root { --bg-color: #020617; --card-bg: rgba(15, 23, 42, 0.75); --primary: #00ff88; --text-main: #f8fafc; --text-muted: #94a3b8; --border: rgba(255, 255, 255, 0.1); --sidebar-width: 270px; }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
-    body { background-color: var(--bg-color); color: var(--text-main); overflow-x: hidden; min-height: 100vh; background-image: radial-gradient(circle at 10% 20%, rgba(0, 255, 136, 0.05) 0%, transparent 40%), radial-gradient(circle at 90% 80%, rgba(99, 102, 241, 0.05) 0%, transparent 40%); background-attachment: fixed; }
+    body { background-color: var(--bg-color); color: var(--text-main); min-height: 100vh; background-image: radial-gradient(circle at 10% 20%, rgba(0, 255, 136, 0.05) 0%, transparent 40%), radial-gradient(circle at 90% 80%, rgba(99, 102, 241, 0.05) 0%, transparent 40%); background-attachment: fixed; }
     
     .sys-topbar { position: fixed; top: 0; left: 0; width: 100%; height: 70px; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(15px); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; z-index: 1000; }
-    .sys-title { font-size: 16px; font-weight: 800; color: var(--primary); text-transform: uppercase; }
+    .sys-title { font-size: 15px; font-weight: 800; color: var(--primary); text-transform: uppercase; }
     .sys-sidebar { position: fixed; top: 0; left: -100%; width: var(--sidebar-width); height: 100vh; background: rgba(15, 23, 42, 0.98); backdrop-filter: blur(20px); border-right: 1px solid var(--border); z-index: 9999; padding-top: 85px; transition: left 0.4s; }
     .sys-sidebar.active { left: 0; }
-    .nav-item { padding: 16px 24px; display: flex; align-items: center; gap: 15px; color: var(--text-muted); font-size: 14px; font-weight: 600; cursor: pointer; text-decoration: none; border-left: 4px solid transparent; }
+    .nav-item { padding: 15px 24px; display: flex; align-items: center; gap: 15px; color: var(--text-muted); font-size: 14px; font-weight: 600; cursor: pointer; text-decoration: none; border-left: 4px solid transparent; }
     .nav-item:hover, .nav-item.active { background: rgba(0, 255, 136, 0.08); border-left-color: var(--primary); color: var(--primary); }
     .sys-content { padding: 95px 20px 40px; max-width: 650px; margin: 0 auto; }
     .floating-fab { position: fixed; bottom: 25px; left: 20px; width: 55px; height: 55px; background: var(--primary); color: #000; border-radius: 50%; border: none; font-size: 20px; cursor: pointer; z-index: 9998; display: flex; align-items: center; justify-content: center; }
     
     .glass-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 20px; padding: 25px; margin-bottom: 20px; backdrop-filter: blur(10px); }
-    
-    .modern-input { width: 100%; padding: 16px; margin-bottom: 15px; border-radius: 14px; border: 1px solid var(--border); background: rgba(0,0,0,0.5); color: #fff; font-size: 15px; outline: none; }
-    .modern-btn { width: 100%; padding: 16px; border-radius: 14px; border: none; background: var(--primary); color: #000; font-weight: 800; font-size: 15px; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; transition: 0.2s; text-decoration: none; }
-    .modern-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .modern-input { width: 100%; padding: 16px; margin-bottom: 15px; border-radius: 14px; border: 1px solid var(--border); background: rgba(0,0,0,0.5); color: #fff; font-size: 14px; outline: none; text-align: center; }
+    .modern-btn { width: 100%; padding: 16px; border-radius: 14px; border: none; background: var(--primary); color: #000; font-weight: 800; font-size: 15px; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; text-decoration: none; }
 
-    /* MODAL POPUP */
     .custom-modal { position: fixed; inset: 0; background: rgba(2, 6, 23, 0.85); backdrop-filter: blur(12px); display: none; justify-content: center; align-items: center; z-index: 100000; padding: 20px; }
-    .modal-box { background: #0f172a; border-radius: 22px; padding: 25px; width: 100%; max-width: 360px; text-align: center; animation: zoomIn 0.3s ease; }
-    @keyframes zoomIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    .modal-box { background: #0f172a; border-radius: 22px; padding: 25px; width: 100%; max-width: 360px; text-align: center; border: 1px solid var(--primary); box-shadow: 0 25px 50px rgba(0,0,0,0.9); }
   </style>
 </head>
 <body>
   <audio id="bgAudio" loop><source src="lagu.mp3" type="audio/mpeg"></audio>
 
-  <!-- MODAL MAINTENANCE (BARU) -->
-  <div id="maintenanceModal" class="custom-modal">
-    <div class="modal-box" style="border: 1px solid #ffb703; box-shadow: 0 25px 50px rgba(0,0,0,0.9), 0 0 25px rgba(255, 183, 3, 0.15);">
-      <div style="width: 65px; height: 65px; margin: 0 auto 15px; background: rgba(255, 183, 3, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid #ffb703;">
-        <i class="fa-solid fa-person-digging" style="font-size: 30px; color: #ffb703;"></i>
-      </div>
-      <h3 style="color: #ffb703; font-size: 18px; font-weight: 800; margin-bottom: 8px;">Server Sedang Maintenance!</h3>
-      <p style="color: var(--text-muted); font-size: 13px; line-height: 1.6; margin-bottom: 22px;">Fitur Universal Downloader saat ini sedang dalam perbaikan dan pembaruan sistem. Silakan coba lagi nanti.</p>
-      
-      <button class="modern-btn" style="background: #ffb703; color: #000; box-shadow: 0 5px 20px rgba(255, 183, 3, 0.3);" onclick="document.getElementById('maintenanceModal').style.display='none'">Kembali</button>
+  <!-- MODAL HASIL EKSTRAK -->
+  <div id="resultModal" class="custom-modal">
+    <div class="modal-box">
+      <i class="fa-solid fa-circle-check" style="font-size: 40px; color: var(--primary); margin-bottom: 15px;"></i>
+      <h3 style="color: #fff; font-size: 18px; font-weight: 800; margin-bottom: 8px;">Ekstraksi Berhasil!</h3>
+      <p id="resultTitle" style="color: var(--text-muted); font-size: 12px; margin-bottom: 20px;"></p>
+      <a id="downloadLinkBtn" href="#" target="_blank" class="modern-btn" style="margin-bottom: 10px;"><i class="fa-solid fa-download"></i> Unduh File Media</a>
+      <button class="modern-btn" style="background: rgba(255,255,255,0.1); color: #fff;" onclick="document.getElementById('resultModal').style.display='none'">Tutup</button>
     </div>
   </div>
 
@@ -58,33 +52,29 @@
 
   <nav class="sys-sidebar" id="sysSidebar">
     <a href="home.html" class="nav-item"><i class="fa-solid fa-house"></i> Dashboard</a>
-    <a href="ai.html" class="nav-item"><i class="fa-solid fa-brain"></i> AI Command Matrix</a>
     <a href="generate.html" class="nav-item"><i class="fa-solid fa-crown"></i> Generate Premium</a>
     <a href="tools.html" class="nav-item active"><i class="fa-solid fa-toolbox"></i> Extractor Tools</a>
     <a href="dev.html" class="nav-item"><i class="fa-solid fa-code"></i> Developer Matrix</a>
+    <a href="ai.html" class="nav-item"><i class="fa-solid fa-brain"></i> AI Command Matrix</a>
     <a href="settings.html" class="nav-item"><i class="fa-solid fa-gear"></i> System Settings</a>
-    <div class="nav-item" onclick="executeLogout()" style="margin-top: 40px; color: #ff3366;"><i class="fa-solid fa-power-off"></i> Keluar Sistem</div>
+    <div class="nav-item" onclick="executeLogout()" style="margin-top: 20px; color: #ff3366;"><i class="fa-solid fa-power-off"></i> Keluar Sistem</div>
   </nav>
 
   <main class="sys-content">
     <div class="glass-card" style="text-align: center;">
-      <!-- LOGO TENGAH (BARU) -->
       <div style="width: 85px; height: 85px; margin: 0 auto 20px; background: rgba(0,255,136,0.05); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px dashed var(--primary); box-shadow: 0 0 25px rgba(0,255,136,0.15);">
         <i class="fa-solid fa-cloud-arrow-down" style="font-size: 38px; color: var(--primary);"></i>
       </div>
       
-      <h3 style="justify-content: center; margin-bottom: 25px; font-size: 18px; font-weight: 800;">Universal Downloader Core</h3>
+      <h3 style="margin-bottom: 25px; font-size: 18px; font-weight: 800;">Universal Downloader Core</h3>
       
-      <select id="dlPlatform" class="modern-input" style="appearance: none; text-align: center;">
+      <select id="dlPlatform" class="modern-input">
         <option value="tiktok_video">TikTok Engine (MP4)</option>
-        <option value="tiktok_audio">TikTok Engine (MP3)</option>
         <option value="youtube_video">YouTube Engine (MP4)</option>
-        <option value="youtube_audio">YouTube Engine (MP3)</option>
       </select>
       
-      <input type="text" id="dlUrl" class="modern-input" placeholder="Paste URL Source di sini..." style="text-align: center;">
+      <input type="text" id="dlUrl" class="modern-input" placeholder="Paste URL Source di sini...">
       
-      <!-- TOMBOL UNDUH YG MEMICU MAINTENANCE -->
       <button id="dlBtn" class="modern-btn" onclick="apiDownloadMedia()"><i class="fa-solid fa-download"></i> Eksekusi Tautan Media</button>
     </div>
   </main>
@@ -92,10 +82,6 @@
   <script>
     let activeRole = sessionStorage.getItem('alightRole');
     if (!activeRole) window.location.replace('index.html');
-    if (activeRole === "VISITOR") {
-      alert("Akses Ditolak! Harus memiliki role diatas visitor.");
-      window.location.replace('home.html');
-    }
 
     function toggleSidebar() { document.getElementById('sysSidebar').classList.toggle('active'); }
     function executeLogout() { sessionStorage.clear(); window.location.href = 'index.html'; }
@@ -107,16 +93,13 @@
 
     async function apiDownloadMedia() {
       const url = document.getElementById('dlUrl').value.trim();
-      if (!url) return alert("Masukkan link target terlebih dahulu!");
-
-      // FITUR SENGAJA DI-BYPASS KE MODE MAINTENANCE
-      document.getElementById('maintenanceModal').style.display = 'flex';
-      
-      /* (KODE ASLI FETCH API DOWNLOAD DISIMPAN & DINONAKTIFKAN SEMENTARA)
       const plat = document.getElementById('dlPlatform').value;
       const btn = document.getElementById('dlBtn');
+      if (!url) return alert("Masukkan link target terlebih dahulu!");
+
       btn.disabled = true;
       btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Sedang Mengekstrak...`;
+
       try {
         const res = await fetch('/api/download', { 
           method: 'POST', 
@@ -125,7 +108,9 @@
         });
         const data = await res.json();
         if (!res.ok || !data.status) throw new Error(data.error || "Gagal mengambil tautan unduhan.");
-        globalDownloadUrl = data.downloadUrl;
+        
+        document.getElementById('resultTitle').innerText = data.title;
+        document.getElementById('downloadLinkBtn').href = data.downloadUrl;
         document.getElementById('resultModal').style.display = 'flex';
       } catch (e) {
         alert("Gagal: " + e.message);
@@ -133,7 +118,6 @@
         btn.disabled = false;
         btn.innerHTML = `<i class="fa-solid fa-download"></i> Eksekusi Tautan Media`;
       }
-      */
     }
   </script>
 </body>
