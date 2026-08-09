@@ -1,7 +1,7 @@
 {
   "name": "Alight Pro Hub",
   "short_name": "AlightPro",
-  "start_url": "/home.html",
+  "start_url": "/index.html",
   "display": "standalone",
   "background_color": "#020617",
   "theme_color": "#00ff88",
@@ -11,5 +11,8 @@
       "sizes": "192x192",
       "type": "image/png"
     }
-  ]
+  ],
+  "id": "Alightpro",
+  "description": "Alight Hub",
+  "lang": "id"
 }
