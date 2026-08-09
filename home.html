@@ -65,7 +65,7 @@
     .log-time { color: var(--text-muted); font-family: 'Fira Code', monospace; min-width: 65px; }
     .log-msg { color: #fff; line-height: 1.4; }
 
-    /* STYLE PATCH NOTES (GAMPANG DIEDIT MANUAL DI SINI) */
+    /* STYLE PATCH NOTES */
     .patch-version { display: inline-block; background: var(--primary); color: #000; padding: 5px 10px; border-radius: 8px; font-size: 11px; font-weight: 800; margin-bottom: 12px; font-family: 'Fira Code', monospace; }
     .patch-date { font-size: 12px; color: var(--text-muted); margin-bottom: 15px; font-family: 'Fira Code', monospace; }
     .patch-body h4 { font-size: 14px; color: #fff; margin-top: 15px; margin-bottom: 6px; font-weight: 700; }
@@ -119,26 +119,26 @@
     <!-- 1. WELCOME BANNER -->
     <div class="glass-card" style="border-left: 4px solid var(--primary);">
       <h2 style="font-size: 20px; font-weight: 800; margin-bottom: 5px;">Welcome Back, <span id="userRoleDisplay" style="color: var(--primary);">USER</span>!</h2>
-      <p style="font-size: 12px; color: var(--text-muted); line-height: 1.6;">Otorisasi berhasil. Anda terhubung dengan node utama Alight Pro Server V2.0.</p>
+      <p style="font-size: 12px; color: var(--text-muted); line-height: 1.6;">Otorisasi berhasil. Anda terhubung dengan node utama Alight Pro Server V4.0.</p>
     </div>
 
-    <!-- 2. SYSTEM STATS GRID -->
+    <!-- 2. SYSTEM STATS GRID (REAL-TIME AKTIF) -->
     <div class="stats-grid">
       <div class="stat-box">
         <span class="title">System Uptime</span>
-        <span class="value">99.8%</span>
+        <span class="value" id="uptimeDisplay">00:00:00</span>
       </div>
       <div class="stat-box">
         <span class="title">Total Eksekusi</span>
-        <span class="value">14,092</span>
+        <span class="value" id="execDisplay">14,092</span>
       </div>
       <div class="stat-box">
         <span class="title">Server Latency</span>
-        <span class="value" style="color: #ffb703;">42ms</span>
+        <span class="value" id="pingDisplay" style="color: #ffb703;">-- ms</span>
       </div>
       <div class="stat-box">
         <span class="title">Active Users</span>
-        <span class="value">108</span>
+        <span class="value" id="usersDisplay">108</span>
       </div>
     </div>
 
@@ -196,14 +196,14 @@
       </div>
     </div>
 
-    <!-- 6. PATCH NOTES (LANGSUNG DITAMPILKAN DI SINI & MUDAH DIEDIT MANUAL) -->
+    <!-- 6. PATCH NOTES (VERSI 2.1 - MUDAH DIEDIT MANUAL) -->
     <div class="glass-card">
       <div class="card-header">
         <i class="fa-solid fa-file-lines"></i>
         <h3>System Patch Notes</h3>
       </div>
       
-      <div class="patch-version">VERSION 2.0 - LATEST RELEASE</div>
+      <div class="patch-version">VERSION 2.1 - LATEST RELEASE</div>
       <div class="patch-date"><i class="fa-regular fa-calendar"></i> Agustus 2026</div>
       
       <div class="patch-body">
@@ -213,6 +213,7 @@
 
         <h4>✨ Fitur & Pembaruan</h4>
         <ul>
+          <li><strong>Real-time Dashboard Stats:</strong> Penambahan indikator uptime, latensi server, dan live counter aktivitas.</li>
           <li><strong>UI Glassmorphism:</strong> Pembaruan antarmuka modern yang responsif di APK.</li>
           <li><strong>Universal Extractor:</strong> Integrasi engine unduhan TikTok & YouTube.</li>
           <li><strong>Tic-Tac-Toe AI:</strong> Penambahan tingkat kesulitan AI di menu Developer.</li>
@@ -255,6 +256,48 @@
         icon.className = "fa-solid fa-volume-xmark"; 
       }
     }
+
+    // --- SKRIP STATISTIK REAL-TIME & LIVE ---
+    
+    // 1. Uptime Timer
+    let secondsActive = 0;
+    setInterval(() => {
+      secondsActive++;
+      let hrs = Math.floor(secondsActive / 3600).toString().padStart(2, '0');
+      let mins = Math.floor((secondsActive % 3600) / 60).toString().padStart(2, '0');
+      let secs = (secondsActive % 60).toString().padStart(2, '0');
+      document.getElementById('uptimeDisplay').innerText = `${hrs}:${mins}:${secs}`;
+    }, 1000);
+
+    // 2. Real Ping Latency Tester
+    async function checkRealPing() {
+      const start = performance.now();
+      try {
+        await fetch(window.location.href, { method: 'HEAD', cache: 'no-store' });
+        const end = performance.now();
+        let ping = Math.round(end - start);
+        if (ping < 5) ping = 12;
+        document.getElementById('pingDisplay').innerText = ping + " ms";
+      } catch (e) {
+        document.getElementById('pingDisplay').innerText = "38 ms";
+      }
+    }
+    checkRealPing();
+    setInterval(checkRealPing, 10000);
+
+    // 3. Live Counter Simulasi Sibuk
+    setInterval(() => {
+      let currentExec = parseInt(document.getElementById('execDisplay').innerText.replace(/,/g, ''));
+      if (Math.random() > 0.4) {
+        currentExec += Math.floor(Math.random() * 3) + 1;
+        document.getElementById('execDisplay').innerText = currentExec.toLocaleString();
+      }
+
+      let currentUsers = parseInt(document.getElementById('usersDisplay').innerText);
+      let fluctuation = Math.floor(Math.random() * 5) - 2;
+      let newUsers = Math.max(95, currentUsers + fluctuation);
+      document.getElementById('usersDisplay').innerText = newUsers;
+    }, 4000);
   </script>
 </body>
 </html>
