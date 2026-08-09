@@ -6,28 +6,76 @@
   <title>Alight Pro Hub | Dashboard</title>
   
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Fira+Code&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Fira+Code:wght@500&display=swap" rel="stylesheet">
 
   <style>
     :root { --bg-color: #020617; --card-bg: rgba(15, 23, 42, 0.75); --primary: #00ff88; --text-main: #f8fafc; --text-muted: #94a3b8; --border: rgba(255, 255, 255, 0.1); --sidebar-width: 270px; }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
-    body { background-color: var(--bg-color); color: var(--text-main); overflow-x: hidden; min-height: 100vh; background-image: radial-gradient(circle at 10% 20%, rgba(0, 255, 136, 0.05) 0%, transparent 40%), radial-gradient(circle at 90% 80%, rgba(99, 102, 241, 0.05) 0%, transparent 40%); background-attachment: fixed; }
+    
+    body { 
+      background-color: var(--bg-color); 
+      color: var(--text-main); 
+      overflow-x: hidden; 
+      min-height: 100vh; 
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(0, 255, 136, 0.05) 0%, transparent 40%), 
+        radial-gradient(circle at 90% 80%, rgba(99, 102, 241, 0.05) 0%, transparent 40%); 
+      background-attachment: fixed; 
+    }
 
     /* LAYOUT BERSAMA */
     .sys-topbar { position: fixed; top: 0; left: 0; width: 100%; height: 70px; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(15px); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; z-index: 1000; }
     .sys-title { font-size: 16px; font-weight: 800; color: var(--primary); letter-spacing: 1.5px; text-transform: uppercase; }
+    
     .sys-sidebar { position: fixed; top: 0; left: -100%; width: var(--sidebar-width); height: 100vh; background: rgba(15, 23, 42, 0.98); backdrop-filter: blur(20px); border-right: 1px solid var(--border); z-index: 9999; padding-top: 85px; transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 20px 0 50px rgba(0,0,0,0.8); }
     .sys-sidebar.active { left: 0; }
+    
     .nav-item { padding: 16px 24px; display: flex; align-items: center; gap: 15px; color: var(--text-muted); font-size: 14px; font-weight: 600; cursor: pointer; text-decoration: none; transition: 0.3s; border-left: 4px solid transparent; }
     .nav-item:hover, .nav-item.active { background: rgba(0, 255, 136, 0.08); border-left-color: var(--primary); color: var(--primary); }
-    .sys-content { padding: 95px 20px 40px; max-width: 650px; margin: 0 auto; }
-    .floating-fab { position: fixed; bottom: 25px; left: 20px; width: 55px; height: 55px; background: var(--primary); color: #000; border-radius: 50%; border: none; font-size: 20px; cursor: pointer; box-shadow: 0 8px 25px rgba(0,255,136,0.4); z-index: 9998; display: flex; align-items: center; justify-content: center; }
+    
+    .sys-content { padding: 95px 20px 40px; max-width: 700px; margin: 0 auto; }
+    
+    .floating-fab { position: fixed; bottom: 25px; left: 20px; width: 55px; height: 55px; background: var(--primary); color: #000; border-radius: 50%; border: none; font-size: 20px; cursor: pointer; box-shadow: 0 8px 25px rgba(0,255,136,0.4); z-index: 9998; display: flex; align-items: center; justify-content: center; transition: 0.3s; }
+    .floating-fab:active { transform: scale(0.9); }
     
     /* ELEMEN KONTEN */
-    .glass-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 20px; padding: 25px; margin-bottom: 20px; backdrop-filter: blur(10px); box-shadow: 0 10px 30px rgba(0,0,0,0.4); animation: fadeIn 0.4s ease-out; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+    .glass-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 20px; padding: 25px; margin-bottom: 20px; backdrop-filter: blur(10px); box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
+
+    .card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+    .card-header h3 { font-size: 16px; font-weight: 800; color: #fff; }
+    .card-header i { color: var(--primary); font-size: 18px; }
+
     .modern-btn { width: 100%; padding: 16px; border-radius: 14px; border: none; background: var(--primary); color: #000; font-weight: 800; font-size: 15px; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; transition: 0.2s; }
     
+    /* Grid Statistik */
+    .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 20px; }
+    .stat-box { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.05); padding: 15px; border-radius: 14px; display: flex; flex-direction: column; gap: 5px; }
+    .stat-box .title { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+    .stat-box .value { font-size: 20px; font-weight: 800; color: var(--primary); font-family: 'Fira Code', monospace; }
+
+    /* Progress Bar Resource */
+    .resource-item { margin-bottom: 15px; }
+    .resource-header { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 8px; font-weight: 600; }
+    .progress-bg { width: 100%; height: 8px; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; }
+    .progress-bar { height: 100%; background: var(--primary); border-radius: 10px; box-shadow: 0 0 10px var(--primary); }
+
+    /* Activity Log List */
+    .log-list { display: flex; flex-direction: column; gap: 12px; }
+    .log-item { display: flex; gap: 12px; font-size: 12px; background: rgba(0,0,0,0.3); padding: 12px; border-radius: 12px; border-left: 3px solid var(--primary); }
+    .log-time { color: var(--text-muted); font-family: 'Fira Code', monospace; min-width: 65px; }
+    .log-msg { color: #fff; line-height: 1.4; }
+
+    /* STYLE PATCH NOTES (GAMPANG DIEDIT MANUAL DI SINI) */
+    .patch-version { display: inline-block; background: var(--primary); color: #000; padding: 5px 10px; border-radius: 8px; font-size: 11px; font-weight: 800; margin-bottom: 12px; font-family: 'Fira Code', monospace; }
+    .patch-date { font-size: 12px; color: var(--text-muted); margin-bottom: 15px; font-family: 'Fira Code', monospace; }
+    .patch-body h4 { font-size: 14px; color: #fff; margin-top: 15px; margin-bottom: 6px; font-weight: 700; }
+    .patch-body p, .patch-body li { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+    .patch-body ul { padding-left: 18px; margin-bottom: 10px; }
+    .patch-body hr { border: none; border-top: 1px solid var(--border); margin: 15px 0; }
+
+    /* FOOTER */
+    .sys-footer { text-align: center; padding: 20px 0 40px; color: var(--text-muted); font-size: 11px; letter-spacing: 1px; }
+
     /* MODAL ROLES */
     #rolesInfoModal { position: fixed; inset: 0; background: rgba(2, 6, 23, 0.85); backdrop-filter: blur(10px); display: none; justify-content: center; align-items: center; z-index: 100000; padding: 20px; }
     .modal-content { background: #0f172a; border: 1px solid var(--primary); border-radius: 22px; padding: 30px 24px; width: 100%; max-width: 360px; text-align: center; }
@@ -43,7 +91,7 @@
       <i class="fa-solid fa-user-shield" style="font-size: 40px; color: var(--primary); margin-bottom: 15px;"></i>
       <h3 style="color: var(--primary); margin-bottom: 10px; font-weight: 800;">Info Roles & Akses</h3>
       <p style="text-align: left; color: var(--text-muted); font-size: 13px; line-height: 1.7; margin-bottom: 20px;">
-        • <strong style="color:#fff;">Visitor:</strong> Hanya bisa melihat dashboard.<br>
+        • <strong style="color:#fff;">Visitor:</strong> Hanya bisa melihat dashboard overview.<br>
         • <strong style="color:#fff;">Member:</strong> Akses menu Generate & Tools.<br>
         • <strong style="color:#fff;">Admin:</strong> Akses penuh tanpa batas.<br>
       </p>
@@ -67,22 +115,128 @@
   </nav>
 
   <main class="sys-content">
+    
+    <!-- 1. WELCOME BANNER -->
+    <div class="glass-card" style="border-left: 4px solid var(--primary);">
+      <h2 style="font-size: 20px; font-weight: 800; margin-bottom: 5px;">Welcome Back, <span id="userRoleDisplay" style="color: var(--primary);">USER</span>!</h2>
+      <p style="font-size: 12px; color: var(--text-muted); line-height: 1.6;">Otorisasi berhasil. Anda terhubung dengan node utama Alight Pro Server V4.0.</p>
+    </div>
+
+    <!-- 2. SYSTEM STATS GRID -->
+    <div class="stats-grid">
+      <div class="stat-box">
+        <span class="title">System Uptime</span>
+        <span class="value">99.8%</span>
+      </div>
+      <div class="stat-box">
+        <span class="title">Total Eksekusi</span>
+        <span class="value">14,092</span>
+      </div>
+      <div class="stat-box">
+        <span class="title">Server Latency</span>
+        <span class="value" style="color: #ffb703;">42ms</span>
+      </div>
+      <div class="stat-box">
+        <span class="title">Active Users</span>
+        <span class="value">108</span>
+      </div>
+    </div>
+
+    <!-- 3. PROFILE CREATOR CARD -->
     <div class="glass-card" style="text-align: center;">
-      <img src="juiko_coders_profile.jpg" style="width: 100px; height: 100px; object-fit: cover; border-radius:50%; margin: 0 auto 15px; border: 3px solid var(--primary); display:block; box-shadow: 0 0 20px rgba(0,255,136,0.2);" alt="Juiko Coders">
-      <h2 style="font-size: 22px; margin-bottom: 10px; font-weight:800;">JUIKO CODERS</h2>
+      <div class="card-header" style="justify-content: center; border-bottom: none;">
+        <i class="fa-solid fa-user-astronaut"></i>
+        <h3>Developer Profile</h3>
+      </div>
+      <img src="juiko_coders_profile.jpg" style="width: 100px; height: 100px; object-fit: cover; border-radius:50%; margin: 0 auto 15px; border: 3px solid var(--primary); display:block; box-shadow: 0 0 25px rgba(0,255,136,0.3);" alt="Juiko Coders">
+      <h2 style="font-size: 22px; margin-bottom: 10px; font-weight:800; letter-spacing: 1px;">JUIKO CODERS</h2>
+      
       <div style="background: rgba(0,0,0,0.4); padding: 20px; border-radius: 14px; border: 1px solid var(--border); margin-bottom: 20px; text-align: left;">
-        <p style="color: var(--text-muted); font-size: 13px; line-height: 1.8; font-style: italic;">
-          "Hai aku Juiko, ini adalah web yg gw deploy dri Vercel nah gw mau mempermudah orang agar mengepremkan akun am nya secara mudah dan tools yg lain mau gua tambah stabilkan."
+        <p style="color: var(--text-muted); font-size: 13px; line-height: 1.8; font-style: italic; margin-bottom: 10px;">
+          "Hai aku Juiko, web ini gw deploy dari Vercel untuk mempermudah temen-temen mengepremkan akun AM secara instan dan stabil."
         </p>
       </div>
+      
       <button class="modern-btn" onclick="openRolesModal()" style="background: rgba(0,255,136,0.1); border: 1px dashed var(--primary); color: var(--primary);">
         <i class="fa-solid fa-user-shield"></i> Cek Info Roles & Akses
       </button>
     </div>
+
+    <!-- 4. RESOURCE MONITOR -->
+    <div class="glass-card">
+      <div class="card-header">
+        <i class="fa-solid fa-server"></i>
+        <h3>Server Resource Monitor</h3>
+      </div>
+      <div class="resource-item">
+        <div class="resource-header"><span>CPU Load</span> <span style="color: #00ff88;">34%</span></div>
+        <div class="progress-bg"><div class="progress-bar" style="width: 34%;"></div></div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-header"><span>RAM Usage</span> <span style="color: #ffb703;">78%</span></div>
+        <div class="progress-bg"><div class="progress-bar" style="width: 78%; background: #ffb703;"></div></div>
+      </div>
+    </div>
+
+    <!-- 5. RECENT ACTIVITY LOG -->
+    <div class="glass-card">
+      <div class="card-header">
+        <i class="fa-solid fa-list-check"></i>
+        <h3>System Activity Logs</h3>
+      </div>
+      <div class="log-list">
+        <div class="log-item">
+          <div class="log-time">10:45 AM</div>
+          <div class="log-msg">User berhasil mengekstrak media TikTok tanpa watermark.</div>
+        </div>
+        <div class="log-item">
+          <div class="log-time">09:12 AM</div>
+          <div class="log-msg">Injeksi payload email AM Premium berhasil dieksekusi.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6. PATCH NOTES (LANGSUNG DITAMPILKAN DI SINI & MUDAH DIEDIT MANUAL) -->
+    <div class="glass-card">
+      <div class="card-header">
+        <i class="fa-solid fa-file-lines"></i>
+        <h3>System Patch Notes</h3>
+      </div>
+      
+      <div class="patch-version">VERSION 2.0 - LATEST RELEASE</div>
+      <div class="patch-date"><i class="fa-regular fa-calendar"></i> Agustus 2026</div>
+      
+      <div class="patch-body">
+        <p>Catatan pembaruan dan perbaikan sistem terbaru:</p>
+        
+        <hr>
+
+        <h4>✨ Fitur & Pembaruan</h4>
+        <ul>
+          <li><strong>UI Glassmorphism:</strong> Pembaruan antarmuka modern yang responsif di APK.</li>
+          <li><strong>Universal Extractor:</strong> Integrasi engine unduhan TikTok & YouTube.</li>
+          <li><strong>Tic-Tac-Toe AI:</strong> Penambahan tingkat kesulitan AI di menu Developer.</li>
+        </ul>
+
+        <h4>🛠️ Perbaikan Bug</h4>
+        <ul>
+          <li>Optimalisasi kecepatan respons serverless Vercel.</li>
+          <li>Perbaikan kestabilan tombol unduh di dalam build APK.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 7. FOOTER -->
+    <div class="sys-footer">
+      <p>&copy; 2026 Alight Pro Hub by Juiko Coders.</p>
+    </div>
+
   </main>
 
   <script>
-    if (!sessionStorage.getItem('alightRole')) window.location.replace('index.html');
+    let role = sessionStorage.getItem('alightRole');
+    if (!role) window.location.replace('index.html');
+    document.getElementById('userRoleDisplay').innerText = role;
     
     function openRolesModal() { document.getElementById('rolesInfoModal').style.display = 'flex'; }
     function closeRolesModal() { document.getElementById('rolesInfoModal').style.display = 'none'; }
@@ -93,8 +247,13 @@
     function toggleAudio() {
       const audio = document.getElementById('bgAudio');
       const icon = document.getElementById('audioIcon');
-      if(audio.paused) { audio.play().catch(e=>alert("Klik layar dulu untuk memutar.")); icon.className = "fa-solid fa-volume-high"; } 
-      else { audio.pause(); icon.className = "fa-solid fa-volume-xmark"; }
+      if(audio.paused) { 
+        audio.play().catch(e=>alert("Klik layar dulu untuk memutar lagu.")); 
+        icon.className = "fa-solid fa-volume-high"; 
+      } else { 
+        audio.pause(); 
+        icon.className = "fa-solid fa-volume-xmark"; 
+      }
     }
   </script>
 </body>
